@@ -119,31 +119,51 @@ const router = new Router();
 //#region static assets
 
 router.get("/static-assets/(.*)", async ctx => {
-    await send(ctx as any, ctx.path.replace("/static-assets/", ""), {
-        root: staticAssets,
-        maxage: ms("7 days"),
-    });
+    try {
+        await send(ctx as any, ctx.path.replace("/static-assets/", ""), {
+            root: staticAssets,
+            maxage: ms("7 days"),
+        });
+    } catch (err) {
+        // Hide internal error messages
+        ctx.status = 404;
+    }
 });
 
 router.get("/client-assets/(.*)", async ctx => {
-    await send(ctx as any, ctx.path.replace("/client-assets/", ""), {
-        root: clientAssets,
-        maxage: ms("7 days"),
-    });
+    try {
+        await send(ctx as any, ctx.path.replace("/client-assets/", ""), {
+            root: clientAssets,
+            maxage: ms("7 days"),
+        });
+    } catch (err) {
+        // Hide internal error messages
+        ctx.status = 404;
+    }
 });
 
 router.get("/assets/(.*)", async ctx => {
-    await send(ctx as any, ctx.path.replace("/assets/", ""), {
-        root: assets,
-        maxage: ms("7 days"),
-    });
+    try {
+        await send(ctx as any, ctx.path.replace("/assets/", ""), {
+            root: assets,
+            maxage: ms("7 days"),
+        });
+    } catch (err) {
+        // Hide internal error messages
+        ctx.status = 404;
+    }
 });
 
 // Apple touch icon
 router.get("/apple-touch-icon.png", async ctx => {
-    await send(ctx as any, "/apple-touch-icon.png", {
-        root: staticAssets,
-    });
+    try {
+        await send(ctx as any, "/apple-touch-icon.png", {
+            root: staticAssets,
+        });
+    } catch (err) {
+        // Hide internal error messages
+        ctx.status = 404;
+    }
 });
 
 router.get("/twemoji/(.*)", async ctx => {
@@ -156,10 +176,15 @@ router.get("/twemoji/(.*)", async ctx => {
 
     ctx.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
 
-    await send(ctx as any, path, {
-        root: `${_dirname}/../../../node_modules/@discordapp/twemoji/dist/svg/`,
-        maxage: ms("30 days"),
-    });
+    try {
+        await send(ctx as any, path, {
+            root: `${_dirname}/../../../node_modules/@discordapp/twemoji/dist/svg/`,
+            maxage: ms("30 days"),
+        });
+    } catch (err) {
+        // Hide internal error messages
+        ctx.status = 404;
+    }
 });
 
 router.get("/twemoji-badge/(.*)", async ctx => {
