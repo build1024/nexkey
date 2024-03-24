@@ -32,4 +32,4 @@ COPY --chown=misskey:misskey . ./
 
 ENV NODE_ENV=production
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["npm", "run", "migrateandstart"]
+CMD ["./docker-entrypoint.sh"]
