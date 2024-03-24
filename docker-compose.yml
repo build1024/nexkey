@@ -2,31 +2,44 @@ version: "3"
 
 services:
   web:
-    #build: .
-    image: nexryai/nexkey
+    build: .
+    #image: nexryai/nexkey
     restart: always
-    links:
-      - db
-      - redis
-    ports:
-      - "127.0.0.1:3000:3000"
+    container_name: nexkey_web
     volumes:
       - ./files:/misskey/files
       - ./.config:/misskey/.config:ro
-    healthcheck:
-      test: timeout 10s bash -c ':> /dev/tcp/127.0.0.1/3000' || exit 1
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
 
   redis:
     restart: always
-    image: redis:alpine
+    image: redis:7.2.4-alpine
+    container_name: nexkey_redis
     volumes:
       - ./redis:/data
+    healthcheck:
+      test: "redis-cli ping"
+      timeout: 2s
+      interval: 2s
+      start_period: 10s
+      retries: 5
 
   db:
     restart: always
-    image: postgres:16-alpine
+    image: postgres:16.1-alpine
+    container_name: nexkey_db
     env_file:
       - .config/docker.env
     volumes:
       - ./db:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready -U '$${POSTGRES_USER}' || exit 1"
+      timeout: 2s
+      interval: 2s
+      start_period: 10s
+      retries: 5
 
