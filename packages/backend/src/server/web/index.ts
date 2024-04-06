@@ -40,13 +40,13 @@ const swAssets = `${_dirname}/../../../../../built/_sw_dist_/`;
 // ToDo: script-srcのunsafeを消せるようにする
 export function genCsp() {
     const csp
-        = "base-uri 'none'; "
+        = "base-uri 'self'; "
         + "default-src 'none'; "
         + "script-src 'self' 'unsafe-inline' https://www.recaptcha.net/recaptcha/ https://www.gstatic.com/recaptcha/ https://challenges.cloudflare.com; "
         + "img-src 'self' https: data: blob:; "
         + "media-src 'self' https:; "
-        + "style-src 'self' 'unsafe-inline'; "
-        + "font-src 'self'; "
+        + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        + "font-src 'self' https://fonts.gstatic.com; "
         + "frame-src 'self' https:; "
         + "manifest-src 'self'; "
         + `connect-src 'self' data: blob: ${config.wsUrl}; `	// wssを指定しないとSafariで動かない https://github.com/w3c/webappsec-csp/issues/7#issuecomment-1086257826
@@ -76,6 +76,13 @@ app.use(async (ctx, next) => {
             ctx.status = 403;
             return;
         }
+        if (url === bullBoardPath) {
+            // redirect to url with a trailing slash
+            ctx.redirect(bullBoardPath + "/");
+            return;
+        }
+        const { csp } = genCsp();
+        ctx.set("Content-Security-Policy", csp);
     }
     await next();
 });
