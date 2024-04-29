@@ -60,21 +60,32 @@ const app = new Koa();
 
 //#region Bull Dashboard
 const bullBoardPath = "/queue";
+const bullBoardAllowedEndpoints = [
+    bullBoardPath + "/api/queues/deliver/promote",
+];
 
 // Authenticate
 app.use(async (ctx, next) => {
     // %71ueueとかでリクエストされたら困るため
     const url = decodeURI(ctx.path);
     if (url === bullBoardPath || url.startsWith(bullBoardPath + "/")) {
-        const token = ctx.cookies.get("token");
-        if (token == null) {
-            ctx.status = 401;
+        if (!bullBoardAllowedEndpoints.includes(url) || ctx.method !== "PUT") {
+            ctx.status = 404;
             return;
-        }
-        const user = await Users.findOneBy({ token });
-        if (user == null || !(user.isAdmin || user.isModerator)) {
-            ctx.status = 403;
-            return;
+        } else {
+            ctx.set("Cache-Control", "private, max-age=0, must-revalidate");
+
+            const token = ctx.cookies.get("token");
+            if (token == null) {
+                ctx.status = 401;
+                return;
+            }
+
+            const user = await Users.findOneBy({ token });
+            if (user == null || !(user.isAdmin || user.isModerator)) {
+                ctx.status = 403;
+                return;
+            }
         }
         if (url === bullBoardPath) {
             // redirect to url with a trailing slash

@@ -22,12 +22,14 @@
                     </FormInput>
 
                     <FormSplit :min-width="300">
+                        <MkInfo warn>{{ i18n.ts.maintainerEmailInfo }}</MkInfo>
+
                         <FormInput v-model="maintainerName" class="_formBlock">
                             <template #label>{{ i18n.ts.maintainerName }}</template>
                         </FormInput>
 
-                        <FormInput v-model="maintainerEmail" type="email" class="_formBlock">
-                            <template #prefix><i class="ti ti-mail"></i></template>
+                        <FormInput v-model="maintainerEmail" class="_formBlock">
+                            <template #prefix><i class="ti ti-message"></i></template>
                             <template #label>{{ i18n.ts.maintainerEmail }}</template>
                         </FormInput>
                     </FormSplit>
