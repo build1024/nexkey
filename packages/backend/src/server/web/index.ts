@@ -4,7 +4,7 @@
 
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PathOrFileDescriptor, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import ms from "ms";
 import Koa from "koa";
 import Router from "@koa/router";
@@ -12,17 +12,13 @@ import send from "koa-send";
 import favicon from "koa-favicon";
 import views from "koa-views";
 import sharp from "sharp";
-import { createBullBoard } from "@bull-board/api";
-import { BullAdapter } from "@bull-board/api/bullAdapter.js";
-import { KoaAdapter } from "@bull-board/koa";
 
 import { In, IsNull } from "typeorm";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import config from "@/config/index.js";
-import { Users, Notes, UserProfiles, Pages, Channels, Clips, GalleryPosts } from "@/models/index.js";
+import { Users, Notes, UserProfiles, Pages, Clips } from "@/models/index.js";
 import * as Acct from "@/misc/acct.js";
 import { getNoteSummary } from "@/misc/get-note-summary.js";
-import { queues } from "@/queue/queues.js";
 import { genOpenapiSpec } from "../api/openapi/gen-spec.js";
 import { urlPreviewHandler } from "./url-preview.js";
 import { manifestHandler } from "./manifest.js";
@@ -36,9 +32,20 @@ const clientAssets = `${_dirname}/../../../../client/assets/`;
 const assets = `${_dirname}/../../../../../built/_client_dist_/`;
 const swAssets = `${_dirname}/../../../../../built/_sw_dist_/`;
 
+const allowedAssetsExt = [".js", ".css", ".map", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif", ".woff", ".woff2", ".ttf", ".eot", ".otf", "LICENSE"];
+
+function isAllowedAssetExt(ctx: Koa.Context): boolean {
+    const path = ctx.path;
+
+    // ロケールファイルは許可
+    if (path.startsWith("/assets/locales/") && path.includes("-") && path.endsWith(".json")) return true;
+
+    return allowedAssetsExt.some(ext => path.endsWith(ext));
+}
+
 // 参考にした: https://github.com/mei23/misskey/blob/2c6db29a4acbce7e4ad8d40a54afc481019199ab/src/server/web/index.ts#L33
 // ToDo: script-srcのunsafeを消せるようにする
-export function genCsp() {
+export function genCsp(): {csp: string } {
     const csp
         = "base-uri 'self'; "
         + "default-src 'none'; "
@@ -57,57 +64,6 @@ export function genCsp() {
 
 // Init app
 const app = new Koa();
-
-//#region Bull Dashboard
-const bullBoardPath = "/queue";
-const bullBoardAllowedEndpoints = [
-    bullBoardPath + "/api/queues/deliver/promote",
-];
-
-// Authenticate
-app.use(async (ctx, next) => {
-    // %71ueueとかでリクエストされたら困るため
-    const url = decodeURI(ctx.path);
-    if (url === bullBoardPath || url.startsWith(bullBoardPath + "/")) {
-        if (!bullBoardAllowedEndpoints.includes(url) || ctx.method !== "PUT") {
-            ctx.status = 404;
-            return;
-        } else {
-            ctx.set("Cache-Control", "private, max-age=0, must-revalidate");
-
-            const token = ctx.cookies.get("token");
-            if (token == null) {
-                ctx.status = 401;
-                return;
-            }
-
-            const user = await Users.findOneBy({ token });
-            if (user == null || !(user.isAdmin || user.isModerator)) {
-                ctx.status = 403;
-                return;
-            }
-        }
-        if (url === bullBoardPath) {
-            // redirect to url with a trailing slash
-            ctx.redirect(bullBoardPath + "/");
-            return;
-        }
-        const { csp } = genCsp();
-        ctx.set("Content-Security-Policy", csp);
-    }
-    await next();
-});
-
-const serverAdapter = new KoaAdapter();
-
-createBullBoard({
-    queues: queues.map(q => new BullAdapter(q)),
-    serverAdapter,
-});
-
-serverAdapter.setBasePath(bullBoardPath);
-app.use(serverAdapter.registerPlugin());
-//#endregion
 
 // Init renderer
 app.use(views(_dirname + "/views", {
@@ -137,37 +93,49 @@ const router = new Router();
 //#region static assets
 
 router.get("/static-assets/(.*)", async ctx => {
+    if (!isAllowedAssetExt(ctx)) {
+        ctx.status = 404;
+        return;
+    }
+
     try {
         await send(ctx as any, ctx.path.replace("/static-assets/", ""), {
             root: staticAssets,
             maxage: ms("7 days"),
         });
-    } catch (err) {
-        // Hide internal error messages
+    } catch (e) {
         ctx.status = 404;
     }
 });
 
 router.get("/client-assets/(.*)", async ctx => {
+    if (!isAllowedAssetExt(ctx)) {
+        ctx.status = 404;
+        return;
+    }
+
     try {
         await send(ctx as any, ctx.path.replace("/client-assets/", ""), {
             root: clientAssets,
             maxage: ms("7 days"),
         });
-    } catch (err) {
-        // Hide internal error messages
+    } catch (e) {
         ctx.status = 404;
     }
 });
 
 router.get("/assets/(.*)", async ctx => {
+    if (!isAllowedAssetExt(ctx)) {
+        ctx.status = 404;
+        return;
+    }
+
     try {
         await send(ctx as any, ctx.path.replace("/assets/", ""), {
             root: assets,
             maxage: ms("7 days"),
         });
-    } catch (err) {
-        // Hide internal error messages
+    } catch (e) {
         ctx.status = 404;
     }
 });
@@ -178,9 +146,8 @@ router.get("/apple-touch-icon.png", async ctx => {
         await send(ctx as any, "/apple-touch-icon.png", {
             root: staticAssets,
         });
-    } catch (err) {
-        // Hide internal error messages
-        ctx.status = 404;
+    } catch (e) {
+        ctx.status = 500;
     }
 });
 
@@ -199,8 +166,7 @@ router.get("/twemoji/(.*)", async ctx => {
             root: `${_dirname}/../../../node_modules/@discordapp/twemoji/dist/svg/`,
             maxage: ms("30 days"),
         });
-    } catch (err) {
-        // Hide internal error messages
+    } catch (e) {
         ctx.status = 404;
     }
 });
@@ -250,19 +216,27 @@ router.get("/twemoji-badge/(.*)", async ctx => {
 
 // ServiceWorker
 router.get("/sw.js", async ctx => {
-    await send(ctx as any, "/sw.js", {
-        root: swAssets,
-        maxage: ms("10 minutes"),
-    });
+    try {
+        await send(ctx as any, "/sw.js", {
+            root: swAssets,
+            maxage: ms("10 minutes"),
+        });
+    } catch (e) {
+        ctx.status = 500;
+    }
 });
 
 // Manifest
 router.get("/manifest.json", manifestHandler);
 
 router.get("/robots.txt", async ctx => {
-    await send(ctx as any, "/robots.txt", {
-        root: staticAssets,
-    });
+    try {
+        await send(ctx as any, "/robots.txt", {
+            root: staticAssets,
+        });
+    } catch (e) {
+        ctx.status = 500;
+    }
 });
 
 //#endregion
@@ -273,9 +247,13 @@ router.get("/api-doc", async ctx => {
     ctx.set("Content-Security-Policy", csp);
     ctx.set("Cache-Control", "public, max-age=60");
 
-    await send(ctx as any, "/redoc.html", {
-        root: staticAssets,
-    });
+    try {
+        await send(ctx as any, "/redoc.html", {
+            root: staticAssets,
+        });
+    } catch (e) {
+        ctx.status = 500;
+    }
 });
 
 // URL preview endpoint

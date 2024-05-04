@@ -340,7 +340,7 @@ export function emailDeliver(to: string | null, subject: string | null, html: st
     if (subject == null) return null;
     if (html == null) return null;
     if (text == null) return null;
-		
+
     const data = {
 		    to,
 		    subject,
@@ -413,4 +413,40 @@ export function destroy() {
         inboxLogger.succ(`Cleaned ${jobs.length} ${status} jobs`);
     });
     inboxQueue.clean(0, "delayed");
+}
+
+export async function promoteAllDeliverJobs() {
+    const delayedQueues = await deliverQueue.getDelayed();
+    for (let queueIndex = 0; queueIndex < delayedQueues.length; queueIndex++) {
+        const queue = delayedQueues[queueIndex];
+        try {
+            await queue.promote();
+        } catch (e) {
+            if (e instanceof Error) {
+                if (e.message.indexOf("not in a delayed state") !== -1) {
+                    throw e;
+                }
+            } else {
+                throw e;
+            }
+        }
+    }
+}
+
+export async function promoteAllInboxJobs() {
+    const delayedQueues = await inboxQueue.getDelayed();
+    for (let queueIndex = 0; queueIndex < delayedQueues.length; queueIndex++) {
+        const queue = delayedQueues[queueIndex];
+        try {
+            await queue.promote();
+        } catch (e) {
+            if (e instanceof Error) {
+                if (e.message.indexOf("not in a delayed state") !== -1) {
+                    throw e;
+                }
+            } else {
+                throw e;
+            }
+        }
+    }
 }

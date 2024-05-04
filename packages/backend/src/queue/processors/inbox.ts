@@ -3,6 +3,7 @@ import Bull from "bull";
 import httpSignature from "@peertube/http-signature";
 import perform from "@/remote/activitypub/perform.js";
 import Logger from "@/services/logger.js";
+import config from "@/config/index.js";
 import { registerOrFetchInstanceDoc } from "@/services/register-or-fetch-instance-doc.js";
 import { Instances } from "@/models/index.js";
 import { apRequestChart, federationChart, instanceChart } from "@/services/chart/index.js";
@@ -23,7 +24,7 @@ const logger = new Logger("inbox");
 // ユーザーのinboxにアクティビティが届いた時の処理
 export default async (job: Bull.Job<InboxJobData>): Promise<string> => {
     const signature = job.data.signature;	// HTTP-signature
-    const activity = job.data.activity;
+    let activity = job.data.activity;
 
     //#region Log
     const info = Object.assign({}, activity) as any;
@@ -83,7 +84,7 @@ export default async (job: Bull.Job<InboxJobData>): Promise<string> => {
     // また、signatureのsignerは、activity.actorと一致する必要がある
     if (!httpSignatureValidated || authUser.user.uri !== activity.actor) {
         // 一致しなくても、でもLD-Signatureがありそうならそっちも見る
-        if (activity.signature) {
+        if (!config.ignoreApForwarded && activity.signature) {
             if (activity.signature.type !== "RsaSignature2017") {
                 return `skip: unsupported LD-signature type ${activity.signature.type}`;
             }
@@ -112,6 +113,8 @@ export default async (job: Bull.Job<InboxJobData>): Promise<string> => {
                 return "skip: LD-Signatureの検証に失敗しました";
             }
 
+            activity = await ldSignature.compactToWellKnown(activity);
+
             // もう一度actorチェック
             if (authUser.user.uri !== activity.actor) {
                 return `skip: LD-Signature user(${authUser.user.uri}) !== activity.actor(${activity.actor})`;
@@ -123,7 +126,7 @@ export default async (job: Bull.Job<InboxJobData>): Promise<string> => {
                 return `Blocked request: ${ldHost}`;
             }
         } else {
-            return `skip: http-signature verification failed and no LD-Signature. keyId=${signature.keyId}`;
+            return `skip: http-signature verification failed and ${config.ignoreApForwarded ? "ignoreApForwarded" : "no LD-Signature"}. keyId=${signature.keyId}`;
         }
     }
 
