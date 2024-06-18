@@ -4,7 +4,7 @@ import { extractMentions } from "@/misc/extract-mentions.js";
 import { extractCustomEmojisFromMfm } from "@/misc/extract-custom-emojis-from-mfm.js";
 import { extractHashtags } from "@/misc/extract-hashtags.js";
 import { Note, IMentionedRemoteUsers } from "@/models/entities/note.js";
-import { Mutings, Users, NoteWatchings, Notes, Instances, UserProfiles, Antennas, Followings, MutedNotes, Channels, ChannelFollowings, Blockings, NoteThreadMutings } from "@/models/index.js";
+import { Mutings, Users, NoteWatchings, Notes, Instances, UserProfiles, Antennas, Followings, MutedNotes, Blockings, NoteThreadMutings } from "@/models/index.js";
 import { DriveFile } from "@/models/entities/drive-file.js";
 import { App } from "@/models/entities/app.js";
 import { insertNoteUnread } from "@/services/note/unread.js";
@@ -39,8 +39,6 @@ import { updateHashtags } from "../update-hashtag.js";
 import { deliverToRelays } from "../relay.js";
 import { addNoteToAntenna } from "../add-note-to-antenna.js";
 import { createNotification } from "../create-notification.js";
-import sonic from "../../db/sonic.js";
-import es from "../../db/elasticsearch.js";
 
 const mutedWordsCache = new Cache<{ userId: UserProfile["userId"]; mutedWords: UserProfile["mutedWords"]; }[]>(1000 * 60 * 5);
 
@@ -132,31 +130,12 @@ type Option = {
 };
 
 export default async (user: { id: User["id"]; username: User["username"]; host: User["host"]; isSilenced: User["isSilenced"]; createdAt: User["createdAt"]; }, data: Option, silent = false) => new Promise<Note>(async (res, rej) => {
-    // チャンネル外にリプライしたら対象のスコープに合わせる
-    // (クライアントサイドでやっても良い処理だと思うけどとりあえずサーバーサイドで)
-    if (data.reply && data.channel && data.reply.channelId !== data.channel.id) {
-        if (data.reply.channelId) {
-            data.channel = await Channels.findOneBy({ id: data.reply.channelId });
-        } else {
-            data.channel = null;
-        }
-    }
-
-    // チャンネル内にリプライしたら対象のスコープに合わせる
-    // (クライアントサイドでやっても良い処理だと思うけどとりあえずサーバーサイドで)
-    if (data.reply && (data.channel == null) && data.reply.channelId) {
-        data.channel = await Channels.findOneBy({ id: data.reply.channelId });
-    }
-
     if (data.createdAt == null) data.createdAt = new Date();
     if (data.visibility == null) data.visibility = "public";
     if (data.localOnly == null) data.localOnly = false;
-    if (data.channel != null) data.visibility = "public";
-    if (data.channel != null) data.visibleUsers = [];
-    if (data.channel != null) data.localOnly = true;
 
     // サイレンス
-    if (user.isSilenced && data.visibility === "public" && data.channel == null) {
+    if (user.isSilenced && data.visibility === "public") {
         data.visibility = "home";
     }
 
@@ -205,12 +184,12 @@ export default async (user: { id: User["id"]; username: User["username"]; host: 
     }
 
     // ローカルのみをRenoteしたらローカルのみにする
-    if (data.renote && data.renote.localOnly && data.channel == null) {
+    if (data.renote && data.renote.localOnly) {
         data.localOnly = true;
     }
 
     // ローカルのみにリプライしたらローカルのみにする
-    if (data.reply && data.reply.localOnly && data.channel == null) {
+    if (data.reply && data.reply.localOnly) {
         data.localOnly = true;
     }
 
@@ -310,7 +289,7 @@ export default async (user: { id: User["id"]; username: User["username"]; host: 
     });
 
     // Antenna
-	 // TODO: キャッシュしたい
+    // TODO: キャッシュしたい
     if (!config.disableAntenna) {
         Followings.createQueryBuilder("following")
 			.andWhere("following.followeeId = :userId", { userId: note.userId })
@@ -327,18 +306,6 @@ export default async (user: { id: User["id"]; username: User["username"]; host: 
 			        });
 			    }
 			});
-    }
-
-    // Channel
-    if (note.channelId) {
-        ChannelFollowings.findBy({ followeeId: note.channelId }).then(followings => {
-            for (const following of followings) {
-                insertNoteUnread(following.followerId, note, {
-                    isSpecified: false,
-                    isMentioned: false,
-                });
-            }
-        });
     }
 
     if (data.reply) {
@@ -506,30 +473,6 @@ export default async (user: { id: User["id"]; username: User["username"]; host: 
         }
         //#endregion
     }
-
-    if (data.channel) {
-        Channels.increment({ id: data.channel.id }, "notesCount", 1);
-        Channels.update(data.channel.id, {
-            lastNotedAt: new Date(),
-        });
-
-        Notes.countBy({
-            userId: user.id,
-            channelId: data.channel.id,
-        }).then(count => {
-            // この処理が行われるのはノート作成後なので、ノートが一つしかなかったら最初の投稿だと判断できる
-            // TODO: とはいえノートを削除して何回も投稿すればその分だけインクリメントされる雑さもあるのでどうにかしたい
-            if (count === 1) {
-                Channels.increment({ id: data.channel!.id }, "usersCount", 1);
-            }
-        });
-
-        // Register to search database
-        await index(note);
-    }
-
-    // Register to search database
-    index(note);
 });
 
 async function renderNoteOrRenoteActivity(data: Option, note: Note) {
@@ -645,36 +588,6 @@ async function insertNote(user: { id: User["id"]; host: User["host"]; }, data: O
         console.error(e);
 
         throw e;
-    }
-}
-
-export async function index(note: Note): Promise<void> {
-    if (!note.text) return;
-
-    if (config.elasticsearch && es) {
-        es.index({
-            index: config.elasticsearch.index || "misskey_note",
-            id: note.id.toString(),
-            body: {
-                text: normalizeForSearch(note.text),
-                userId: note.userId,
-                userHost: note.userHost,
-            },
-        });
-    }
-
-    if (sonic) {
-        await sonic.ingest.push(
-            sonic.collection,
-            sonic.bucket,
-            JSON.stringify({
-                id: note.id,
-                userId: note.userId,
-                userHost: note.userHost,
-                channelId: note.channelId,
-            }),
-            note.text,
-        );
     }
 }
 
