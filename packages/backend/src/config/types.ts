@@ -60,8 +60,6 @@ export type Source = {
 
 	accesslog?: string;
 
-	clusterLimit?: number;
-
 	onlyQueueProcessor?: boolean;
 
 	disableQueueProcessor?: boolean;
@@ -77,13 +75,8 @@ export type Source = {
 	deliverJobMaxAttempts?: number;
 	inboxJobMaxAttempts?: number;
 
-	syslog: {
-		host: string;
-		port: number;
-	};
-
 	mediaProxy?: string;
-	
+
 	disableAntenna?: boolean;
 	disableSearch?: boolean;
 

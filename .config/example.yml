@@ -133,9 +133,6 @@ id: 'aid'
 # Whether disable HSTS
 #disableHsts: true
 
-# Number of worker processes
-#clusterLimit: 1
-
 # Worker only mode
 # onlyQueueProcessor: false
 
@@ -156,11 +153,6 @@ id: 'aid'
 
 # IP address family used for outgoing request (ipv4, ipv6 or dual)
 #outgoingAddressFamily: ipv4
-
-# Syslog option
-#syslog:
-#  host: localhost
-#  port: 514
 
 # Proxy for HTTP/HTTPS
 #proxy: http://127.0.0.1:3128

@@ -1,3 +1,12 @@
+# Build npmrun
+FROM rust:1-alpine as npmrun-builder
+WORKDIR /src
+
+RUN apk add --no-cache git alpine-sdk
+
+RUN git clone https://github.com/nexryai/npmrun.git .
+RUN cargo build --release
+
 FROM node:20-alpine3.19 AS builder
 
 ARG NODE_ENV=production
@@ -28,11 +37,13 @@ WORKDIR /misskey
 COPY --chown=misskey:misskey --from=builder /misskey/built ./built
 COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/node_modules ./packages/backend/node_modules
 COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/built ./packages/backend/built
-COPY --chown=misskey:misskey docker-entrypoint.sh ./
+COPY --chown=misskey:misskey package.json ./
 COPY --chown=misskey:misskey packages/backend/assets packages/backend/assets
 COPY --chown=misskey:misskey packages/backend/migration packages/backend/migration
 COPY --chown=misskey:misskey packages/backend/ormconfig.js packages/backend/package.json ./packages/backend
 
+COPY --from=npmrun-builder /src/target/release/npmrun /usr/local/bin/npmrun
+
 ENV NODE_ENV=production
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["./docker-entrypoint.sh"]
+CMD ["npmrun", "docker:start"]
