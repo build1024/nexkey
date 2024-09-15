@@ -31,13 +31,18 @@ RUN apk add --no-cache ca-certificates tini curl vips vips-cpp \
 	&& addgroup -g "${GID}" misskey \
 	&& adduser -u "${UID}" -G misskey -D -h /misskey misskey
 
+# Add pm2 for managing a node process
+RUN npm install pm2 -g
+
+RUN mkdir -p /var/log/misskey && chown misskey:misskey /var/log/misskey
+
 USER misskey
 WORKDIR /misskey
 
 COPY --chown=misskey:misskey --from=builder /misskey/built ./built
 COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/node_modules ./packages/backend/node_modules
 COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/built ./packages/backend/built
-COPY --chown=misskey:misskey package.json ./
+COPY --chown=misskey:misskey package.json pm2-config.json ./
 COPY --chown=misskey:misskey packages/backend/assets packages/backend/assets
 COPY --chown=misskey:misskey packages/backend/migration packages/backend/migration
 COPY --chown=misskey:misskey packages/backend/ormconfig.js packages/backend/package.json ./packages/backend

@@ -1,0 +1,11 @@
+{
+    "apps" : [{
+        "name": "nexkey",
+        "script": "./built/index.js",
+        "instances": 1,
+        "out_file": "/var/log/misskey/misskey.log",
+        "error_file": "/var/log/misskey/error.log",
+        "combine_logs": true,
+        "time": true
+    }]
+}
