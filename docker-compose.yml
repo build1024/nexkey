@@ -9,6 +9,7 @@ services:
     volumes:
       - ./files:/misskey/files
       - ./.config:/misskey/.config:ro
+      - ./log:/var/log/misskey
     depends_on:
       redis:
         condition: service_healthy
