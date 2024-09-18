@@ -12,7 +12,7 @@
                     <span v-for="emoji in easterEggEmojis" :key="emoji.id" class="emoji" :data-physics-x="emoji.left" :data-physics-y="emoji.top" :class="{ _physics_circle_: !emoji.emoji.startsWith(':') }"><MkEmoji class="emoji" :emoji="emoji.emoji" :custom-emojis="$instance.emojis" :is-reaction="false" :normal="true" :no-style="true"/></span>
                 </div>
                 <div class="_formBlock" style="text-align: center;">
-                    {{ i18n.ts._aboutMisskey.about }}<br><a href="https://github.com/nexryai/nexkey" target="_blank" class="_link">{{ i18n.ts.learnMore }}</a>
+                    {{ i18n.ts._aboutMisskey.about }}<br><a href="https://github.com/nexkey/nexkey" target="_blank" class="_link">{{ i18n.ts.learnMore }}</a>
                 </div>
                 <div class="_formBlock" style="text-align: center;">
                     <MkButton primary rounded inline @click="iLoveMisskey">I <Mfm text="$[jelly ❤]"/> #Misskey</MkButton>
@@ -20,6 +20,18 @@
                 <FormSection>
                     <div class="_formLinks">
                         <FormLink to="https://github.com/nexryai/nexkey" external>
+                            <template #icon><i class="ti ti-code"></i></template>
+                            {{ i18n.ts._aboutMisskey.source }}（オリジナル）
+                            <template #suffix>GitHub</template>
+                        </FormLink>
+                    </div>
+                </FormSection>
+                <FormSection>
+                    <div class="_formLinks">
+                        <MkInfo>
+                            本サーバーで動作しているNexkeyはオリジナル版のコードを一部改変したものです。
+                        </MkInfo>
+                        <FormLink to="https://github.com/build1024/nexkey" external>
                             <template #icon><i class="ti ti-code"></i></template>
                             {{ i18n.ts._aboutMisskey.source }}
                             <template #suffix>GitHub</template>
@@ -84,6 +96,7 @@ import FormLink from "@/components/form/link.vue";
 import FormSection from "@/components/form/section.vue";
 import MkButton from "@/components/MkButton.vue";
 import MkLink from "@/components/MkLink.vue";
+import MkInfo from "@/components/MkInfo.vue";
 import { physics } from "@/scripts/physics";
 import { i18n } from "@/i18n";
 import { defaultStore } from "@/store";
