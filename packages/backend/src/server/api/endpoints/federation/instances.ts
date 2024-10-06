@@ -1,4 +1,3 @@
-import config from "@/config/index.js";
 import { Instances } from "@/models/index.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { sqlLikeEscape } from "@/misc/sql-like-escape.js";
@@ -65,7 +64,7 @@ export default define(meta, paramDef, async (ps, me) => {
         if (ps.blocked) {
             query.andWhere(meta.blockedHosts.length === 0 ? "1=0" : "instance.host ILIKE ANY(ARRAY[:...blocked])", { blocked: meta.blockedHosts.flatMap(x => [x, `%.${x}`]) });
         } else {
-            query.andWhere(meta.blockedHosts.length === 0 ? "1=1" : "instance.host NOT ILIKE ANY(ARRAY[:...blocked])", { blocked: meta.blockedHosts.flatMap(x => [x, `%.${x}`]) });
+            query.andWhere(meta.blockedHosts.length === 0 ? "1=1" : "instance.host NOT ILIKE ALL(ARRAY[:...blocked])", { blocked: meta.blockedHosts.flatMap(x => [x, `%.${x}`]) });
         }
     }
 
