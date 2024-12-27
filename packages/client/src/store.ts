@@ -1,6 +1,5 @@
 import { markRaw, ref } from "vue";
 import { Storage } from "./pizzax";
-import { Theme } from "./scripts/theme";
 
 export const postFormActions = [];
 export const userActions = [];
@@ -81,7 +80,6 @@ export const defaultStore = markRaw(new Storage("base", {
         where: "account",
         default: [
             "notifications",
-            "messaging",
             "followRequests",
             "drive",
             "explore",
@@ -312,7 +310,7 @@ export const defaultStore = markRaw(new Storage("base", {
     },
     showOnlineUsersOnNavbar: {
         where: "account",
-        default: true,
+        default: false,
     },
     searchEngine: {
         where: "device",

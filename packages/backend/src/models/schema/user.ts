@@ -288,10 +288,6 @@ export const packedMeDetailedOnlySchema = {
             type: "boolean",
             nullable: true, optional: false,
         },
-        receiveAnnouncementEmail: {
-            type: "boolean",
-            nullable: true, optional: false,
-        },
         alwaysMarkNsfw: {
             type: "boolean",
             nullable: true, optional: false,
@@ -336,14 +332,6 @@ export const packedMeDetailedOnlySchema = {
             type: "boolean",
             nullable: false, optional: false,
         },
-        hasUnreadChannel: {
-            type: "boolean",
-            nullable: false, optional: false,
-        },
-        hasUnreadMessagingMessage: {
-            type: "boolean",
-            nullable: false, optional: false,
-        },
         hasUnreadNotification: {
             type: "boolean",
             nullable: false, optional: false,
@@ -384,23 +372,7 @@ export const packedMeDetailedOnlySchema = {
                 nullable: false, optional: false,
             },
         },
-        emailNotificationTypes: {
-            type: "array",
-            nullable: true, optional: false,
-            items: {
-                type: "string",
-                nullable: false, optional: false,
-            },
-        },
         //#region secrets
-        email: {
-            type: "string",
-            nullable: true, optional: true,
-        },
-        emailVerified: {
-            type: "boolean",
-            nullable: true, optional: true,
-        },
         securityKeysList: {
             type: "array",
             nullable: false, optional: true,

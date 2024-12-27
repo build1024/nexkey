@@ -52,7 +52,6 @@ import * as ep___admin_relays_remove from "./endpoints/admin/relays/remove.js";
 import * as ep___admin_reset2fa from "./endpoints/admin/reset-2fa.js";
 import * as ep___admin_resetPassword from "./endpoints/admin/reset-password.js";
 import * as ep___admin_resolveAbuseUserReport from "./endpoints/admin/resolve-abuse-user-report.js";
-import * as ep___admin_sendEmail from "./endpoints/admin/send-email.js";
 import * as ep___admin_sendNotification from "./endpoints/admin/send-notification.js";
 import * as ep___admin_serverInfo from "./endpoints/admin/server-info.js";
 import * as ep___admin_showModerationLogs from "./endpoints/admin/show-moderation-logs.js";
@@ -84,13 +83,6 @@ import * as ep___auth_session_userkey from "./endpoints/auth/session/userkey.js"
 import * as ep___blocking_create from "./endpoints/blocking/create.js";
 import * as ep___blocking_delete from "./endpoints/blocking/delete.js";
 import * as ep___blocking_list from "./endpoints/blocking/list.js";
-import * as ep___charts_activeUsers from "./endpoints/charts/active-users.js";
-import * as ep___charts_apRequest from "./endpoints/charts/ap-request.js";
-import * as ep___charts_federation from "./endpoints/charts/federation.js";
-import * as ep___charts_instance from "./endpoints/charts/instance.js";
-import * as ep___charts_notes from "./endpoints/charts/notes.js";
-import * as ep___charts_user_notes from "./endpoints/charts/user/notes.js";
-import * as ep___charts_users from "./endpoints/charts/users.js";
 import * as ep___clips_addNote from "./endpoints/clips/add-note.js";
 import * as ep___clips_removeNote from "./endpoints/clips/remove-note.js";
 import * as ep___clips_create from "./endpoints/clips/create.js";
@@ -117,7 +109,6 @@ import * as ep___drive_folders_find from "./endpoints/drive/folders/find.js";
 import * as ep___drive_folders_show from "./endpoints/drive/folders/show.js";
 import * as ep___drive_folders_update from "./endpoints/drive/folders/update.js";
 import * as ep___drive_stream from "./endpoints/drive/stream.js";
-import * as ep___emailAddress_available from "./endpoints/email-address/available.js";
 import * as ep___endpoint from "./endpoints/endpoint.js";
 import * as ep___endpoints from "./endpoints/endpoints.js";
 import * as ep___exportCustomEmojis from "./endpoints/export-custom-emojis.js";
@@ -165,10 +156,7 @@ import * as ep___i_importFollowing from "./endpoints/i/import-following.js";
 import * as ep___i_importMuting from "./endpoints/i/import-muting.js";
 import * as ep___i_importUserLists from "./endpoints/i/import-user-lists.js";
 import * as ep___i_notifications from "./endpoints/i/notifications.js";
-import * as ep___i_pageLikes from "./endpoints/i/page-likes.js";
-import * as ep___i_pages from "./endpoints/i/pages.js";
 import * as ep___i_pin from "./endpoints/i/pin.js";
-import * as ep___i_readAllMessagingMessages from "./endpoints/i/read-all-messaging-messages.js";
 import * as ep___i_readAllUnreadNotes from "./endpoints/i/read-all-unread-notes.js";
 import * as ep___i_readAnnouncement from "./endpoints/i/read-announcement.js";
 import * as ep___i_regenerateToken from "./endpoints/i/regenerate-token.js";
@@ -183,18 +171,12 @@ import * as ep___i_registry_set from "./endpoints/i/registry/set.js";
 import * as ep___i_revokeToken from "./endpoints/i/revoke-token.js";
 import * as ep___i_signinHistory from "./endpoints/i/signin-history.js";
 import * as ep___i_unpin from "./endpoints/i/unpin.js";
-import * as ep___i_updateEmail from "./endpoints/i/update-email.js";
 import * as ep___i_update from "./endpoints/i/update.js";
 import * as ep___i_webhooks_create from "./endpoints/i/webhooks/create.js";
 import * as ep___i_webhooks_show from "./endpoints/i/webhooks/show.js";
 import * as ep___i_webhooks_list from "./endpoints/i/webhooks/list.js";
 import * as ep___i_webhooks_update from "./endpoints/i/webhooks/update.js";
 import * as ep___i_webhooks_delete from "./endpoints/i/webhooks/delete.js";
-import * as ep___messaging_history from "./endpoints/messaging/history.js";
-import * as ep___messaging_messages from "./endpoints/messaging/messages.js";
-import * as ep___messaging_messages_create from "./endpoints/messaging/messages/create.js";
-import * as ep___messaging_messages_delete from "./endpoints/messaging/messages/delete.js";
-import * as ep___messaging_messages_read from "./endpoints/messaging/messages/read.js";
 import * as ep___meta from "./endpoints/meta.js";
 import * as ep___miauth_genToken from "./endpoints/miauth/gen-token.js";
 import * as ep___mute_create from "./endpoints/mute/create.js";
@@ -238,13 +220,10 @@ import * as ep___notes_watching_delete from "./endpoints/notes/watching/delete.j
 import * as ep___notifications_create from "./endpoints/notifications/create.js";
 import * as ep___notifications_markAllAsRead from "./endpoints/notifications/mark-all-as-read.js";
 import * as ep___notifications_read from "./endpoints/notifications/read.js";
-import * as ep___pagePush from "./endpoints/page-push.js";
 import * as ep___ping from "./endpoints/ping.js";
 import * as ep___pinnedUsers from "./endpoints/pinned-users.js";
 import * as ep___promo_read from "./endpoints/promo/read.js";
-import * as ep___requestResetPassword from "./endpoints/request-reset-password.js";
 import * as ep___resetDb from "./endpoints/reset-db.js";
-import * as ep___resetPassword from "./endpoints/reset-password.js";
 import * as ep___serverInfo from "./endpoints/server-info.js";
 import * as ep___stats from "./endpoints/stats.js";
 import * as ep___sw_register from "./endpoints/sw/register.js";
@@ -264,7 +243,6 @@ import * as ep___users_lists_push from "./endpoints/users/lists/push.js";
 import * as ep___users_lists_show from "./endpoints/users/lists/show.js";
 import * as ep___users_lists_update from "./endpoints/users/lists/update.js";
 import * as ep___users_notes from "./endpoints/users/notes.js";
-import * as ep___users_pages from "./endpoints/users/pages.js";
 import * as ep___users_reactions from "./endpoints/users/reactions.js";
 import * as ep___users_recommendation from "./endpoints/users/recommendation.js";
 import * as ep___users_relation from "./endpoints/users/relation.js";
@@ -329,7 +307,6 @@ const eps = [
     ["admin/reset-2fa", ep___admin_reset2fa],
     ["admin/reset-password", ep___admin_resetPassword],
     ["admin/resolve-abuse-user-report", ep___admin_resolveAbuseUserReport],
-    ["admin/send-email", ep___admin_sendEmail],
     ["admin/send-notification", ep___admin_sendNotification],
     ["admin/server-info", ep___admin_serverInfo],
     ["admin/show-moderation-logs", ep___admin_showModerationLogs],
@@ -361,13 +338,6 @@ const eps = [
     ["blocking/create", ep___blocking_create],
     ["blocking/delete", ep___blocking_delete],
     ["blocking/list", ep___blocking_list],
-    ["charts/active-users", ep___charts_activeUsers],
-    ["charts/ap-request", ep___charts_apRequest],
-    ["charts/federation", ep___charts_federation],
-    ["charts/instance", ep___charts_instance],
-    ["charts/notes", ep___charts_notes],
-    ["charts/user/notes", ep___charts_user_notes],
-    ["charts/users", ep___charts_users],
     ["clips/add-note", ep___clips_addNote],
     ["clips/remove-note", ep___clips_removeNote],
     ["clips/create", ep___clips_create],
@@ -394,7 +364,6 @@ const eps = [
     ["drive/folders/show", ep___drive_folders_show],
     ["drive/folders/update", ep___drive_folders_update],
     ["drive/stream", ep___drive_stream],
-    ["email-address/available", ep___emailAddress_available],
     ["endpoint", ep___endpoint],
     ["endpoints", ep___endpoints],
     ["export-custom-emojis", ep___exportCustomEmojis],
@@ -442,10 +411,7 @@ const eps = [
     ["i/import-muting", ep___i_importMuting],
     ["i/import-user-lists", ep___i_importUserLists],
     ["i/notifications", ep___i_notifications],
-    ["i/page-likes", ep___i_pageLikes],
-    ["i/pages", ep___i_pages],
     ["i/pin", ep___i_pin],
-    ["i/read-all-messaging-messages", ep___i_readAllMessagingMessages],
     ["i/read-all-unread-notes", ep___i_readAllUnreadNotes],
     ["i/read-announcement", ep___i_readAnnouncement],
     ["i/regenerate-token", ep___i_regenerateToken],
@@ -460,18 +426,12 @@ const eps = [
     ["i/revoke-token", ep___i_revokeToken],
     ["i/signin-history", ep___i_signinHistory],
     ["i/unpin", ep___i_unpin],
-    ["i/update-email", ep___i_updateEmail],
     ["i/update", ep___i_update],
     ["i/webhooks/create", ep___i_webhooks_create],
     ["i/webhooks/list", ep___i_webhooks_list],
     ["i/webhooks/show", ep___i_webhooks_show],
     ["i/webhooks/update", ep___i_webhooks_update],
     ["i/webhooks/delete", ep___i_webhooks_delete],
-    ["messaging/history", ep___messaging_history],
-    ["messaging/messages", ep___messaging_messages],
-    ["messaging/messages/create", ep___messaging_messages_create],
-    ["messaging/messages/delete", ep___messaging_messages_delete],
-    ["messaging/messages/read", ep___messaging_messages_read],
     ["meta", ep___meta],
     ["miauth/gen-token", ep___miauth_genToken],
     ["mute/create", ep___mute_create],
@@ -515,13 +475,10 @@ const eps = [
     ["notifications/create", ep___notifications_create],
     ["notifications/mark-all-as-read", ep___notifications_markAllAsRead],
     ["notifications/read", ep___notifications_read],
-    ["page-push", ep___pagePush],
     ["ping", ep___ping],
     ["pinned-users", ep___pinnedUsers],
     ["promo/read", ep___promo_read],
-    ["request-reset-password", ep___requestResetPassword],
     ["reset-db", ep___resetDb],
-    ["reset-password", ep___resetPassword],
     ["server-info", ep___serverInfo],
     ["stats", ep___stats],
     ["sw/register", ep___sw_register],
@@ -541,7 +498,6 @@ const eps = [
     ["users/lists/show", ep___users_lists_show],
     ["users/lists/update", ep___users_lists_update],
     ["users/notes", ep___users_notes],
-    ["users/pages", ep___users_pages],
     ["users/reactions", ep___users_reactions],
     ["users/recommendation", ep___users_recommendation],
     ["users/relation", ep___users_relation],

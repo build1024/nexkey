@@ -1,27 +1,21 @@
 import { User } from "@/models/entities/user.js";
 import { Note } from "@/models/entities/note.js";
 import { UserList } from "@/models/entities/user-list.js";
-import { UserGroup } from "@/models/entities/user-group.js";
 import config from "@/config/index.js";
 import { Antenna } from "@/models/entities/antenna.js";
-import { Channel } from "@/models/entities/channel.js";
 import {
     StreamChannels,
     AntennaStreamTypes,
     BroadcastTypes,
-    ChannelStreamTypes,
     DriveStreamTypes,
-    GroupMessagingStreamTypes,
     InternalStreamTypes,
     MainStreamTypes,
-    MessagingIndexStreamTypes,
-    MessagingStreamTypes,
     NoteStreamTypes,
     UserListStreamTypes,
     UserStreamTypes,
 } from "@/server/api/stream/types.js";
 import { Packed } from "@/misc/schema.js";
-import { redisClient } from "../db/redis.js";
+import { redisClient } from "@/db/redis.js";
 
 class Publisher {
     private publish = (channel: StreamChannels, type: string | null, value?: any): void => {
@@ -62,28 +56,12 @@ class Publisher {
         });
     };
 
-    public publishChannelStream = <K extends keyof ChannelStreamTypes>(channelId: Channel["id"], type: K, value?: ChannelStreamTypes[K]): void => {
-        this.publish(`channelStream:${channelId}`, type, typeof value === "undefined" ? null : value);
-    };
-
     public publishUserListStream = <K extends keyof UserListStreamTypes>(listId: UserList["id"], type: K, value?: UserListStreamTypes[K]): void => {
         this.publish(`userListStream:${listId}`, type, typeof value === "undefined" ? null : value);
     };
 
     public publishAntennaStream = <K extends keyof AntennaStreamTypes>(antennaId: Antenna["id"], type: K, value?: AntennaStreamTypes[K]): void => {
         this.publish(`antennaStream:${antennaId}`, type, typeof value === "undefined" ? null : value);
-    };
-
-    public publishMessagingStream = <K extends keyof MessagingStreamTypes>(userId: User["id"], otherpartyId: User["id"], type: K, value?: MessagingStreamTypes[K]): void => {
-        this.publish(`messagingStream:${userId}-${otherpartyId}`, type, typeof value === "undefined" ? null : value);
-    };
-
-    public publishGroupMessagingStream = <K extends keyof GroupMessagingStreamTypes>(groupId: UserGroup["id"], type: K, value?: GroupMessagingStreamTypes[K]): void => {
-        this.publish(`messagingStream:${groupId}`, type, typeof value === "undefined" ? null : value);
-    };
-
-    public publishMessagingIndexStream = <K extends keyof MessagingIndexStreamTypes>(userId: User["id"], type: K, value?: MessagingIndexStreamTypes[K]): void => {
-        this.publish(`messagingIndexStream:${userId}`, type, typeof value === "undefined" ? null : value);
     };
 
     public publishNotesStream = (note: Packed<"Note">): void => {
@@ -102,9 +80,5 @@ export const publishMainStream = publisher.publishMainStream;
 export const publishDriveStream = publisher.publishDriveStream;
 export const publishNoteStream = publisher.publishNoteStream;
 export const publishNotesStream = publisher.publishNotesStream;
-export const publishChannelStream = publisher.publishChannelStream;
 export const publishUserListStream = publisher.publishUserListStream;
 export const publishAntennaStream = publisher.publishAntennaStream;
-export const publishMessagingStream = publisher.publishMessagingStream;
-export const publishGroupMessagingStream = publisher.publishGroupMessagingStream;
-export const publishMessagingIndexStream = publisher.publishMessagingIndexStream;

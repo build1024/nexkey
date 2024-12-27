@@ -16,7 +16,7 @@ import sharp from "sharp";
 import { In, IsNull } from "typeorm";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import config from "@/config/index.js";
-import { Users, Notes, UserProfiles, Pages, Clips } from "@/models/index.js";
+import { Users, Notes, UserProfiles, Clips } from "@/models/index.js";
 import * as Acct from "@/misc/acct.js";
 import { getNoteSummary } from "@/misc/get-note-summary.js";
 import { urlPreviewHandler } from "./url-preview.js";
@@ -29,7 +29,6 @@ const _dirname = dirname(_filename);
 const staticAssets = `${_dirname}/../../../assets/`;
 const clientAssets = `${_dirname}/../../../../client/assets/`;
 const assets = `${_dirname}/../../../../../built/_client_dist_/`;
-const swAssets = `${_dirname}/../../../../../built/_sw_dist_/`;
 
 const allowedAssetsExt = [".js", ".css", ".map", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".webp", ".avif", ".woff", ".woff2", ".ttf", ".eot", ".otf", "LICENSE"];
 
@@ -213,18 +212,6 @@ router.get("/twemoji-badge/(.*)", async ctx => {
     ctx.body = buffer;
 });
 
-// ServiceWorker
-router.get("/sw.js", async ctx => {
-    try {
-        await send(ctx as any, "/sw.js", {
-            root: swAssets,
-            maxage: ms("10 minutes"),
-        });
-    } catch (e) {
-        ctx.status = 500;
-    }
-});
-
 // Manifest
 router.get("/manifest.json", manifestHandler);
 
@@ -370,50 +357,6 @@ router.get("/notes/:note", async (ctx, next) => {
 
         ctx.set("Content-Security-Policy", csp);
         ctx.set("Cache-Control", "public, max-age=30");
-
-        return;
-    }
-
-    await next();
-});
-
-// Page
-router.get("/@:user/pages/:page", async (ctx, next) => {
-    const { username, host } = Acct.parse(ctx.params.user);
-    const user = await Users.findOneBy({
-        usernameLower: username.toLowerCase(),
-        host: host ?? IsNull(),
-    });
-
-    if (user == null) return;
-
-    const page = await Pages.findOneBy({
-        name: ctx.params.page,
-        userId: user.id,
-    });
-
-    if (page) {
-        const _page = await Pages.pack(page);
-        const profile = await UserProfiles.findOneByOrFail({ userId: page.userId });
-        const meta = await fetchMeta();
-        const { csp } = genCsp();
-
-        await ctx.render("page", {
-            page: _page,
-            profile,
-            avatarUrl: await Users.getAvatarUrl(await Users.findOneByOrFail({ id: page.userId })),
-            instanceName: meta.name || "Misskey",
-            icon: meta.iconUrl,
-            themeColor: meta.themeColor,
-        });
-
-        ctx.set("Content-Security-Policy", csp);
-
-        if (["public"].includes(page.visibility)) {
-            ctx.set("Cache-Control", "public, max-age=15");
-        } else {
-            ctx.set("Cache-Control", "private, max-age=0, must-revalidate");
-        }
 
         return;
     }

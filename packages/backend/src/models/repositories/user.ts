@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, In, Not } from "typeorm";
+import { In, Not } from "typeorm";
 import Ajv from "ajv";
 import { User, ILocalUser, IRemoteUser } from "@/models/entities/user.js";
 import config from "@/config/index.js";
@@ -11,7 +11,7 @@ import { Cache } from "@/misc/cache.js";
 import { db } from "@/db/postgre.js";
 import { sanitizeUrl } from "@/misc/sanitize-url.js";
 import { Instance } from "../entities/instance.js";
-import { Notes, NoteUnreads, FollowRequests, Notifications, MessagingMessages, UserNotePinings, Followings, Blockings, Mutings, RenoteMutings, UserProfiles, UserSecurityKeys, UserGroupJoinings, Pages, Announcements, AnnouncementReads, Antennas, AntennaNotes, ChannelFollowings, Instances, DriveFiles } from "../index.js";
+import { Notes, NoteUnreads, FollowRequests, Notifications, UserNotePinings, Followings, Blockings, Mutings, RenoteMutings, UserProfiles, UserSecurityKeys, Announcements, AnnouncementReads, AntennaNotes, Instances, DriveFiles } from "../index.js";
 
 const userInstanceCache = new Cache<Instance | null>(1000 * 60 * 60 * 3);
 
@@ -123,35 +123,6 @@ export const UserRepository = db.getRepository(User).extend({
         });
     },
 
-    async getHasUnreadMessagingMessage(userId: User["id"]): Promise<boolean> {
-        const mute = await Mutings.findBy({
-            muterId: userId,
-        });
-
-        const joinings = await UserGroupJoinings.findBy({ userId: userId });
-
-        const groupQs = Promise.all(joinings.map(j => MessagingMessages.createQueryBuilder("message")
-			.where("message.groupId = :groupId", { groupId: j.userGroupId })
-			.andWhere("message.userId != :userId", { userId: userId })
-			.andWhere("NOT (:userId = ANY(message.reads))", { userId: userId })
-			.andWhere("message.createdAt > :joinedAt", { joinedAt: j.createdAt }) // 自分が加入する前の会話については、未読扱いしない
-			.getOne().then(x => x != null)));
-
-        const [withUser, withGroups] = await Promise.all([
-            MessagingMessages.count({
-                where: {
-                    recipientId: userId,
-                    isRead: false,
-                    ...(mute.length > 0 ? { userId: Not(In(mute.map(x => x.muteeId))) } : {}),
-                },
-                take: 1,
-            }).then(count => count > 0),
-            groupQs,
-        ]);
-
-        return withUser || withGroups.some(x => x);
-    },
-
     async getHasUnreadAnnouncement(userId: User["id"]): Promise<boolean> {
         const reads = await AnnouncementReads.findBy({
             userId: userId,
@@ -170,17 +141,6 @@ export const UserRepository = db.getRepository(User).extend({
         const unread = myAntennas.length > 0 ? await AntennaNotes.findOneBy({
             antennaId: In(myAntennas.map(x => x.id)),
             read: false,
-        }) : null;
-
-        return unread != null;
-    },
-
-    async getHasUnreadChannel(userId: User["id"]): Promise<boolean> {
-        const channels = await ChannelFollowings.findBy({ followerId: userId });
-
-        const unread = channels.length > 0 ? await NoteUnreads.findOneBy({
-            userId: userId,
-            noteChannelId: In(channels.map(x => x.followeeId)),
         }) : null;
 
         return unread != null;
@@ -349,8 +309,6 @@ export const UserRepository = db.getRepository(User).extend({
                 pinnedNotes: Notes.packMany(pins.map(pin => pin.note!), me, {
                     detail: true,
                 }),
-                pinnedPageId: profile!.pinnedPageId,
-                pinnedPage: profile!.pinnedPageId ? Pages.pack(profile!.pinnedPageId, me) : null,
                 publicReactions: profile!.publicReactions,
                 ffVisibility: profile!.ffVisibility,
                 twoFactorEnabled: profile!.twoFactorEnabled,
@@ -366,7 +324,6 @@ export const UserRepository = db.getRepository(User).extend({
                 avatarId: user.avatarId,
                 bannerId: user.bannerId,
                 injectFeaturedNote: profile!.injectFeaturedNote,
-                receiveAnnouncementEmail: profile!.receiveAnnouncementEmail,
                 alwaysMarkNsfw: profile!.alwaysMarkNsfw,
                 carefulBot: profile!.carefulBot,
                 autoAcceptFollowed: profile!.autoAcceptFollowed,
@@ -385,21 +342,16 @@ export const UserRepository = db.getRepository(User).extend({
                 }).then(count => count > 0),
                 hasUnreadAnnouncement: this.getHasUnreadAnnouncement(user.id),
                 hasUnreadAntenna: this.getHasUnreadAntenna(user.id),
-                hasUnreadChannel: this.getHasUnreadChannel(user.id),
-                hasUnreadMessagingMessage: this.getHasUnreadMessagingMessage(user.id),
                 hasUnreadNotification: this.getHasUnreadNotification(user.id),
                 hasPendingReceivedFollowRequest: this.getHasPendingReceivedFollowRequest(user.id),
                 integrations: profile!.integrations,
                 mutedWords: profile!.mutedWords,
                 mutedInstances: profile!.mutedInstances,
                 mutingNotificationTypes: profile!.mutingNotificationTypes,
-                emailNotificationTypes: profile!.emailNotificationTypes,
                 showTimelineReplies: user.showTimelineReplies || falsy,
             } : {}),
 
             ...(opts.includeSecrets ? {
-                email: profile!.email,
-                emailVerified: profile!.emailVerified,
                 securityKeysList: profile!.twoFactorEnabled
                     ? UserSecurityKeys.find({
                         where: {

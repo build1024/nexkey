@@ -1,5 +1,8 @@
-# Build npmrun
-FROM rust:1-alpine as npmrun-builder
+###################
+### Build npmrun
+###################
+
+FROM rust:1-alpine AS npmrun-builder
 WORKDIR /src
 
 RUN apk add --no-cache git alpine-sdk
@@ -7,22 +10,42 @@ RUN apk add --no-cache git alpine-sdk
 RUN git clone https://github.com/nexryai/npmrun.git .
 RUN cargo build --release
 
-FROM node:22.11.0-alpine3.20 AS builder
+###################
+### Build app
+###################
 
-ARG NODE_ENV=production
-
+FROM node:22.12-alpine3.20 AS builder
 WORKDIR /misskey
 
-RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang libressl-dev vips-dev python3
-
 COPY .npmrc .yarnrc package.json yarn.lock ./
-COPY assets/ ./assets/
 COPY locales/ ./locales/
 COPY scripts/ ./scripts/
 COPY packages/ ./packages/
-RUN yarn install && yarn build
 
-FROM node:22.11.0-alpine3.20 AS runner
+RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang libressl-dev vips-dev python3
+RUN yarn install
+RUN yarn build
+
+###################
+### Install dependencies for production
+###################
+
+FROM node:22.12-alpine3.20 AS deps_installer
+WORKDIR /misskey
+
+COPY .npmrc .yarnrc package.json yarn.lock ./
+COPY locales/ ./locales/
+COPY scripts/ ./scripts/
+COPY packages/ ./packages/
+
+RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang libressl-dev vips-dev python3
+RUN cd packages/backend && yarn install --production
+
+###################
+### Build runner
+###################
+
+FROM node:22.12.0-alpine3.20 AS runner
 
 ARG UID="991"
 ARG GID="991"
@@ -40,7 +63,7 @@ USER misskey
 WORKDIR /misskey
 
 COPY --chown=misskey:misskey --from=builder /misskey/built ./built
-COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/node_modules ./packages/backend/node_modules
+COPY --chown=misskey:misskey --from=deps_installer /misskey/packages/backend/node_modules ./packages/backend/node_modules
 COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/built ./packages/backend/built
 COPY --chown=misskey:misskey package.json pm2-config.json ./
 COPY --chown=misskey:misskey packages/backend/assets packages/backend/assets

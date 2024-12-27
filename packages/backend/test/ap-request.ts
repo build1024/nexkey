@@ -1,5 +1,6 @@
 import * as assert from "assert";
-import httpSignature from "http-signature";
+//@ts-ignore
+import httpSignature from "@peertube/http-signature";
 import { genRsaKeyPair } from "../src/misc/gen-key-pair.js";
 import { createSignedPost, createSignedGet } from "../src/remote/activitypub/ap-request.js";
 

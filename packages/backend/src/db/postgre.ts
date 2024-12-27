@@ -29,14 +29,10 @@ import { SwSubscription } from "@/models/entities/sw-subscription.js";
 import { Blocking } from "@/models/entities/blocking.js";
 import { UserList } from "@/models/entities/user-list.js";
 import { UserListJoining } from "@/models/entities/user-list-joining.js";
-import { UserGroup } from "@/models/entities/user-group.js";
-import { UserGroupJoining } from "@/models/entities/user-group-joining.js";
-import { UserGroupInvitation } from "@/models/entities/user-group-invitation.js";
 import { Hashtag } from "@/models/entities/hashtag.js";
 import { NoteFavorite } from "@/models/entities/note-favorite.js";
 import { AbuseUserReport } from "@/models/entities/abuse-user-report.js";
 import { RegistrationTicket } from "@/models/entities/registration-tickets.js";
-import { MessagingMessage } from "@/models/entities/messaging-message.js";
 import { Signin } from "@/models/entities/signin.js";
 import { AuthSession } from "@/models/entities/auth-session.js";
 import { FollowRequest } from "@/models/entities/follow-request.js";
@@ -48,10 +44,6 @@ import { UserPublickey } from "@/models/entities/user-publickey.js";
 import { UserProfile } from "@/models/entities/user-profile.js";
 import { UserSecurityKey } from "@/models/entities/user-security-key.js";
 import { AttestationChallenge } from "@/models/entities/attestation-challenge.js";
-import { Page } from "@/models/entities/page.js";
-import { PageLike } from "@/models/entities/page-like.js";
-import { GalleryPost } from "@/models/entities/gallery-post.js";
-import { GalleryLike } from "@/models/entities/gallery-like.js";
 import { ModerationLog } from "@/models/entities/moderation-log.js";
 import { UsedUsername } from "@/models/entities/used-username.js";
 import { Announcement } from "@/models/entities/announcement.js";
@@ -64,9 +56,6 @@ import { PromoNote } from "@/models/entities/promo-note.js";
 import { PromoRead } from "@/models/entities/promo-read.js";
 import { Relay } from "@/models/entities/relay.js";
 import { MutedNote } from "@/models/entities/muted-note.js";
-import { Channel } from "@/models/entities/channel.js";
-import { ChannelFollowing } from "@/models/entities/channel-following.js";
-import { ChannelNotePining } from "@/models/entities/channel-note-pining.js";
 import { RegistryItem } from "@/models/entities/registry-item.js";
 import { Ad } from "@/models/entities/ad.js";
 import { PasswordResetRequest } from "@/models/entities/password-reset-request.js";
@@ -74,7 +63,6 @@ import { UserPending } from "@/models/entities/user-pending.js";
 import { Webhook } from "@/models/entities/webhook.js";
 import { UserIp } from "@/models/entities/user-ip.js";
 
-import { entities as charts } from "@/services/chart/entities.js";
 import { dbLogger } from "./logger.js";
 import { redisClient } from "./redis.js";
 
@@ -126,9 +114,6 @@ export const entities = [
     UserPublickey,
     UserList,
     UserListJoining,
-    UserGroup,
-    UserGroupJoining,
-    UserGroupInvitation,
     UserNotePining,
     UserSecurityKey,
     UsedUsername,
@@ -144,10 +129,6 @@ export const entities = [
     NoteWatching,
     NoteThreadMuting,
     NoteUnread,
-    Page,
-    PageLike,
-    GalleryPost,
-    GalleryLike,
     DriveFile,
     DriveFolder,
     Poll,
@@ -158,7 +139,6 @@ export const entities = [
     SwSubscription,
     AbuseUserReport,
     RegistrationTicket,
-    MessagingMessage,
     Signin,
     ModerationLog,
     Clip,
@@ -169,16 +149,12 @@ export const entities = [
     PromoRead,
     Relay,
     MutedNote,
-    Channel,
-    ChannelFollowing,
-    ChannelNotePining,
     RegistryItem,
     Ad,
     PasswordResetRequest,
     UserPending,
     Webhook,
     UserIp,
-    ...charts,
 ];
 
 const log = process.env.NODE_ENV !== "production";
@@ -194,22 +170,6 @@ export const db = new DataSource({
         statement_timeout: 30000 * 10,
         ...config.db.extra,
     },
-    replication: config.dbReplications ? {
-        master: {
-            host: config.db.host,
-            port: config.db.port,
-            username: config.db.user,
-            password: config.db.pass,
-            database: config.db.db,
-        },
-        slaves: config.dbSlaves!.map(rep => ({
-            host: rep.host,
-            port: rep.port,
-            username: rep.user,
-            password: rep.pass,
-            database: rep.db,
-        })),
-    } : undefined,
     synchronize: process.env.NODE_ENV === "test",
     dropSchema: process.env.NODE_ENV === "test",
     cache: !config.db.disableCache ? {

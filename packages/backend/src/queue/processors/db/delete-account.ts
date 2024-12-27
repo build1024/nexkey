@@ -1,10 +1,9 @@
 import Bull from "bull";
-import { AccessTokens, DriveFiles, Notes, UserProfiles, Users, UserNotePinings, MessagingMessages, Followings, Mutings, Blockings, Notifications, FollowRequests, Antennas, NoteReactions, Clips } from "@/models/index.js";
+import { AccessTokens, DriveFiles, Notes, UserProfiles, Users, UserNotePinings, Followings, Mutings, Blockings, Notifications, FollowRequests, Antennas, NoteReactions, Clips } from "@/models/index.js";
 import { DbUserDeleteJobData } from "@/queue/types.js";
 import { Note } from "@/models/entities/note.js";
 import { DriveFile } from "@/models/entities/drive-file.js";
 import { deleteFileSync } from "@/services/drive/delete-file.js";
-import { emailDeliver } from "@/queue/index.js";
 import deleteFollowing from "@/services/following/delete.js";
 import cancelFollowRequest from "@/services/following/requests/cancel.js";
 import { rejectFollowRequest } from "@/services/following/reject.js";
@@ -154,28 +153,13 @@ export async function deleteAccount(job: Bull.Job<DbUserDeleteJobData>): Promise
         logger.succ("All of files deleted");
     }
 
-    { // Send email notification
-        const profile = await UserProfiles.findOneByOrFail({ userId: user.id });
-        if (profile.email && profile.emailVerified) {
-            emailDeliver(profile.email, "Account deleted",
-                "Your account has been deleted.",
-                "Your account has been deleted.");
-        }
-    }
-
     // soft指定されている場合は物理削除しない
     if (job.data.soft) {
         // nop
-        await MessagingMessages.delete({
-            userId: job.data.user.id,
-        });
     } else {
         if (Users.isLocalUser(job.data.user)) {
             await UserProfiles.update(job.data.user.id, {
                 description: null,
-                email: null,
-                emailVerifyCode: null,
-                emailVerified: false,
                 password: null,
                 twoFactorSecret: null,
                 twoFactorTempSecret: null,
@@ -201,9 +185,6 @@ export async function deleteAccount(job: Bull.Job<DbUserDeleteJobData>): Promise
                 userId: job.data.user.id,
             });
             await AccessTokens.delete({
-                userId: job.data.user.id,
-            });
-            await MessagingMessages.delete({
                 userId: job.data.user.id,
             });
             await Followings.delete({

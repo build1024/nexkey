@@ -1,7 +1,6 @@
 import { Brackets } from "typeorm";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { Followings, Notes } from "@/models/index.js";
-import { activeUsersChart } from "@/services/chart/index.js";
 import { genId } from "@/misc/gen-id.js";
 import define from "../../define.js";
 import { ApiError } from "../../error.js";
@@ -10,7 +9,6 @@ import { generateVisibilityQuery } from "../../common/generate-visibility-query.
 import { generateMutedUserQuery } from "../../common/generate-muted-user-query.js";
 import { generateRepliesQuery } from "../../common/generate-replies-query.js";
 import { generateMutedNoteQuery } from "../../common/generate-muted-note-query.js";
-import { generateChannelQuery } from "../../common/generate-channel-query.js";
 import { generateBlockedUserQuery } from "../../common/generate-block-query.js";
 import { generateMutedRenotesQuery } from "../../common/generated-muted-renote-query.js";
 
@@ -90,7 +88,6 @@ export default define(meta, paramDef, async (ps, user) => {
 		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner")
 		.setParameters(followingQuery.getParameters());
 
-    generateChannelQuery(query, user);
     generateRepliesQuery(query, user);
     generateVisibilityQuery(query, user);
     generateMutedUserQuery(query, user);
@@ -134,10 +131,5 @@ export default define(meta, paramDef, async (ps, user) => {
     //#endregion
 
     const timeline = await query.take(ps.limit).getMany();
-
-    process.nextTick(() => {
-        activeUsersChart.read(user);
-    });
-
     return await Notes.packMany(timeline, user);
 });

@@ -8,13 +8,12 @@ import vote from "@/services/note/polls/vote.js";
 import { DriveFile } from "@/models/entities/drive-file.js";
 import { deliverQuestionUpdate } from "@/services/note/polls/update.js";
 import { extractDbHost, toPuny } from "@/misc/convert-host.js";
-import { Emojis, Polls, MessagingMessages } from "@/models/index.js";
+import { Emojis, Polls } from "@/models/index.js";
 import { Note } from "@/models/entities/note.js";
 import { Emoji } from "@/models/entities/emoji.js";
 import { genId } from "@/misc/gen-id.js";
 import { fetchMeta } from "@/misc/fetch-meta.js";
 import { getApLock } from "@/misc/app-lock.js";
-import { createMessage } from "@/services/messages/create.js";
 import { StatusError } from "@/misc/fetch.js";
 import DbResolver from "../db-resolver.js";
 import { parseAudience } from "../audience.js";
@@ -89,8 +88,35 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
 
     logger.info(`Creating the Note: ${note.id}`);
 
+    if (note.id == null) {
+        throw new Error("Note must have an id");
+    }
+
+    const idUrl = new URL(note.id);
+    if (idUrl.protocol !== "https:") {
+        throw new Error(`unexpected schema of note.id: ${note.id}`);
+    }
+
+    let url = getOneApHrefNullable(note.url);
+    const urlParsed = url != null ? new URL(url) : null;
+
     // 投稿者をフェッチ
     const actor = await resolvePerson(getOneApId(note.attributedTo), resolver) as CacheableRemoteUser;
+    if (actor.uri == null) {
+        apLogger.warn("Note actor uri is null, discarding");
+        return null;
+    }
+
+    const actorUri = new URL(actor.uri);
+    if (idUrl.host !== actorUri.host) {
+        apLogger.warn("Note id host doesn't match actor host, discarding");
+        return null;
+    }
+
+    if (urlParsed != null && urlParsed.host !== actorUri.host) {
+        apLogger.debug("Note url host doesn't match actor host, clearing variable");
+        url = undefined;
+    }
 
     // 投稿者が凍結されていたらスキップ
     if (actor.isSuspended) {
@@ -108,8 +134,6 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
             visibility = "public";
         }
     }
-
-    let isTalk = note._misskey_talk && visibility === "specified";
 
     const apMentions = await extractApMentions(note.tag, resolver);
     const apHashtags = await extractApHashtags(note.tag);
@@ -137,17 +161,6 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
                 return x;
             }
         }).catch(async e => {
-            // トークだったらinReplyToのエラーは無視
-            const uri = getApId(note.inReplyTo);
-            if (uri.startsWith(config.url + "/")) {
-                const id = uri.split("/").pop();
-                const talk = await MessagingMessages.findOneBy({ id });
-                if (talk) {
-                    isTalk = true;
-                    return null;
-                }
-            }
-
             logger.warn(`Error in inReplyTo ${note.inReplyTo} - ${e.statusCode || e}`);
             throw e;
         })
@@ -209,7 +222,6 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
     // vote
     if (reply && reply.hasPoll) {
         const poll = await Polls.findOneByOrFail({ noteId: reply.id });
-
         const tryCreateVote = async (name: string, index: number): Promise<null> => {
             if (poll.expiresAt && Date.now() > new Date(poll.expiresAt).getTime()) {
                 logger.warn(`vote to expired poll from AP: actor=${actor.username}@${actor.host}, note=${note.id}, choice=${name}`);
@@ -237,13 +249,6 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
 
     const poll = await extractPollFromQuestion(note, resolver).catch(() => undefined);
 
-    if (isTalk) {
-        for (const recipient of visibleUsers) {
-            await createMessage(actor, recipient, undefined, text || undefined, (files && files.length > 0) ? files[0] : null, object.id);
-            return null;
-        }
-    }
-
     return await post(actor, {
         createdAt: note.published ? new Date(note.published) : null,
         files,
@@ -260,7 +265,7 @@ export async function createNote(value: string | IObject, resolver?: Resolver, s
         apEmojis,
         poll,
         uri: note.id,
-        url: getOneApHrefNullable(note.url),
+        url: url,
     }, silent);
 }
 

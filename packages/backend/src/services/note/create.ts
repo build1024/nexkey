@@ -4,7 +4,7 @@ import { extractMentions } from "@/misc/extract-mentions.js";
 import { extractCustomEmojisFromMfm } from "@/misc/extract-custom-emojis-from-mfm.js";
 import { extractHashtags } from "@/misc/extract-hashtags.js";
 import { Note, IMentionedRemoteUsers } from "@/models/entities/note.js";
-import { Mutings, Users, NoteWatchings, Notes, Instances, UserProfiles, Antennas, Followings, MutedNotes, Blockings, NoteThreadMutings } from "@/models/index.js";
+import { Mutings, Users, NoteWatchings, Notes, UserProfiles, Followings, MutedNotes, Blockings, NoteThreadMutings } from "@/models/index.js";
 import { DriveFile } from "@/models/entities/drive-file.js";
 import { App } from "@/models/entities/app.js";
 import { insertNoteUnread } from "@/services/note/unread.js";
@@ -19,13 +19,11 @@ import DeliverManager from "@/remote/activitypub/deliver-manager.js";
 import { publishMainStream, publishNotesStream } from "@/services/stream.js";
 import { User, ILocalUser, IRemoteUser } from "@/models/entities/user.js";
 import { genId } from "@/misc/gen-id.js";
-import { notesChart, perUserNotesChart, activeUsersChart, instanceChart } from "@/services/chart/index.js";
 import { Poll, IPoll } from "@/models/entities/poll.js";
 import { isDuplicateKeyValueError } from "@/misc/is-duplicate-key-value-error.js";
 import { checkHitAntenna } from "@/misc/check-hit-antenna.js";
 import { checkWordMute } from "@/misc/check-word-mute.js";
 import { countSameRenotes } from "@/misc/count-same-renotes.js";
-import { Channel } from "@/models/entities/channel.js";
 import { normalizeForSearch } from "@/misc/normalize-for-search.js";
 import { getAntennas } from "@/misc/antenna-cache.js";
 import { endedPollNotificationQueue } from "@/queue/queues.js";
@@ -34,7 +32,6 @@ import { Cache } from "@/misc/cache.js";
 import { UserProfile } from "@/models/entities/user-profile.js";
 import { db } from "@/db/postgre.js";
 import { getActiveWebhooks } from "@/misc/webhook-cache.js";
-import { registerOrFetchInstanceDoc } from "../register-or-fetch-instance-doc.js";
 import { updateHashtags } from "../update-hashtag.js";
 import { deliverToRelays } from "../relay.js";
 import { addNoteToAntenna } from "../add-note-to-antenna.js";
@@ -120,7 +117,6 @@ type Option = {
 	cw?: string | null;
 	visibility?: string;
 	visibleUsers?: MinimumUser[] | null;
-	channel?: Channel | null;
 	apMentions?: MinimumUser[] | null;
 	apHashtags?: string[] | null;
 	apEmojis?: string[] | null;
@@ -244,21 +240,6 @@ export default async (user: { id: User["id"]; username: User["username"]; host: 
 
     res(note);
 
-    // 統計を更新
-    notesChart.update(note, true);
-
-    if (user.host == null) {
-        perUserNotesChart.update(user, note, true);
-    }
-
-    // Register host
-    if (Users.isRemoteUser(user)) {
-        registerOrFetchInstanceDoc(user.host).then(i => {
-            Instances.increment({ id: i.id }, "notesCount", 1);
-            instanceChart.updateNote(i.host, note, true);
-        });
-    }
-
     // ハッシュタグ更新
     if (data.visibility === "public" || data.visibility === "home") {
         updateHashtags(user, tags);
@@ -328,8 +309,6 @@ export default async (user: { id: User["id"]; username: User["username"]; host: 
     }
 
     if (!silent) {
-        if (Users.isLocalUser(user)) activeUsersChart.write(user);
-
         // 未読通知を作成
         if (data.visibility === "specified") {
             if (data.visibleUsers == null) throw new Error("invalid param");
@@ -502,7 +481,6 @@ async function insertNote(user: { id: User["id"]; host: User["host"]; }, data: O
         fileIds: data.files ? data.files.map(file => file.id) : [],
         replyId: data.reply ? data.reply.id : null,
         renoteId: data.renote ? data.renote.id : null,
-        channelId: data.channel ? data.channel.id : null,
         threadId: data.reply
             ? data.reply.threadId
                 ? data.reply.threadId

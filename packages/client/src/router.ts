@@ -59,10 +59,6 @@ export const routes = [{
         name: "notifications",
         component: page(() => import("./pages/settings/notifications.vue")),
     }, {
-        path: "/email",
-        name: "email",
-        component: page(() => import("./pages/settings/email.vue")),
-    }, {
         path: "/security",
         name: "security",
         component: page(() => import("./pages/settings/security.vue")),
@@ -86,10 +82,6 @@ export const routes = [{
         path: "/navbar",
         name: "navbar",
         component: page(() => import("./pages/settings/navbar.vue")),
-    }, {
-        path: "/statusbar",
-        name: "statusbar",
-        component: page(() => import("./pages/settings/statusbar.vue")),
     }, {
         path: "/sounds",
         name: "sounds",
@@ -122,10 +114,6 @@ export const routes = [{
         path: "/webhook",
         name: "webhook",
         component: page(() => import("./pages/settings/webhook.vue")),
-    }, {
-        path: "/deck",
-        name: "deck",
-        component: page(() => import("./pages/settings/deck.vue")),
     }, {
         path: "/preferences-backups",
         name: "preferences-backups",
@@ -287,10 +275,6 @@ export const routes = [{
         name: "settings",
         component: iAmAdmin ? page(() => import("./pages/admin/settings.vue")) : page(() => import("./pages/not-found.vue")),
     }, {
-        path: "/email-settings",
-        name: "email-settings",
-        component: iAmAdmin ? page(() => import("./pages/admin/email-settings.vue")) : page(() => import("./pages/not-found.vue")),
-    }, {
         path: "/object-storage",
         name: "object-storage",
         component: iAmAdmin ? page(() => import("./pages/admin/object-storage.vue")) : page(() => import("./pages/not-found.vue")),
@@ -307,10 +291,6 @@ export const routes = [{
         name: "instance-block",
         component: iAmAdmin ? page(() => import("./pages/admin/instance-block.vue")) : page(() => import("./pages/not-found.vue")),
     }, {
-        path: "/email-block",
-        name: "email-block",
-        component: iAmAdmin ? page(() => import("./pages/admin/email-block.vue")) : page(() => import("./pages/not-found.vue")),
-    }, {
         path: "/proxy-account",
         name: "proxy-account",
         component: iAmAdmin ? page(() => import("./pages/admin/proxy-account.vue")) : page(() => import("./pages/not-found.vue")),
@@ -325,19 +305,6 @@ export const routes = [{
 }, {
     path: "/my/notifications",
     component: page(() => import("./pages/notifications.vue")),
-    loginRequired: true,
-}, {
-    name: "messaging",
-    path: "/my/messaging",
-    component: page(() => import("./pages/messaging/index.vue")),
-    loginRequired: true,
-}, {
-    path: "/my/messaging/:userAcct",
-    component: page(() => import("./pages/messaging/messaging-room.vue")),
-    loginRequired: true,
-}, {
-    path: "/my/messaging/group/:groupId",
-    component: page(() => import("./pages/messaging/messaging-room.vue")),
     loginRequired: true,
 }, {
     path: "/my/drive/folder/:folder",

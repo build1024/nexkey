@@ -2,10 +2,7 @@ import { Entity, Column, Index, OneToOne, JoinColumn, PrimaryColumn } from "type
 import { ffVisibility, notificationTypes } from "@/types.js";
 import { id } from "../id.js";
 import { User } from "./user.js";
-import { Page } from "./page.js";
 
-// TODO: このテーブルで管理している情報すべてレジストリで管理するようにしても良いかも
-//       ただ、「emailVerified が true なユーザーを find する」のようなクエリは書けなくなるからウーン
 @Entity()
 export class UserProfile {
 	@PrimaryColumn(id())
@@ -53,27 +50,6 @@ export class UserProfile {
 	    comment: "Remote URL of the user.",
 	})
 	public url: string | null;
-
-	@Column("varchar", {
-	    length: 128, nullable: true,
-	    comment: "The email address of the User.",
-	})
-	public email: string | null;
-
-	@Column("varchar", {
-	    length: 128, nullable: true,
-	})
-	public emailVerifyCode: string | null;
-
-	@Column("boolean", {
-	    default: false,
-	})
-	public emailVerified: boolean;
-
-	@Column("jsonb", {
-	    default: ["follow", "receiveFollowRequest", "groupInvited"],
-	})
-	public emailNotificationTypes: string[];
 
 	@Column("boolean", {
 	    default: false,
@@ -166,23 +142,6 @@ export class UserProfile {
 	    default: true,
 	})
 	public injectFeaturedNote: boolean;
-
-	@Column("boolean", {
-	    default: true,
-	})
-	public receiveAnnouncementEmail: boolean;
-
-	@Column({
-	    ...id(),
-	    nullable: true,
-	})
-	public pinnedPageId: Page["id"] | null;
-
-	@OneToOne(type => Page, {
-	    onDelete: "SET NULL",
-	})
-	@JoinColumn()
-	public pinnedPage: Page | null;
 
 	@Column("jsonb", {
 	    default: {},
