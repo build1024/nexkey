@@ -43,7 +43,6 @@ export const paramDef = {
     required: ["userId"],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, me) => {
     const profile = await UserProfiles.findOneByOrFail({ userId: ps.userId });
 
@@ -53,14 +52,14 @@ export default define(meta, paramDef, async (ps, me) => {
 
     const query = makePaginationQuery(NoteReactions.createQueryBuilder("reaction"),
         ps.sinceId, ps.untilId, ps.sinceDate, ps.untilDate)
-		.andWhere("reaction.userId = :userId", { userId: ps.userId })
-		.leftJoinAndSelect("reaction.note", "note");
+        .andWhere("reaction.userId = :userId", { userId: ps.userId })
+        .leftJoinAndSelect("reaction.note", "note");
 
     generateVisibilityQuery(query, me);
 
     const reactions = await query
-		.take(ps.limit)
-		.getMany();
+        .take(ps.limit)
+        .getMany();
 
     return await Promise.all(reactions.map(reaction => NoteReactions.pack(reaction, me, { withNote: true })));
 });

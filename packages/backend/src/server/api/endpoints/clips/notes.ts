@@ -43,7 +43,6 @@ export const paramDef = {
     required: ["clipId"],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, user) => {
     const clip = await Clips.findOneBy({
         id: ps.clipId,
@@ -58,19 +57,19 @@ export default define(meta, paramDef, async (ps, user) => {
     }
 
     const query = makePaginationQuery(Notes.createQueryBuilder("note"), ps.sinceId, ps.untilId)
-		.innerJoin(ClipNotes.metadata.targetName, "clipNote", "clipNote.noteId = note.id")
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
-		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner")
-		.andWhere("clipNote.clipId = :clipId", { clipId: clip.id });
+        .innerJoin(ClipNotes.metadata.targetName, "clipNote", "clipNote.noteId = note.id")
+        .innerJoinAndSelect("note.user", "user")
+        .leftJoinAndSelect("user.avatar", "avatar")
+        .leftJoinAndSelect("user.banner", "banner")
+        .leftJoinAndSelect("note.reply", "reply")
+        .leftJoinAndSelect("note.renote", "renote")
+        .leftJoinAndSelect("reply.user", "replyUser")
+        .leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
+        .leftJoinAndSelect("replyUser.banner", "replyUserBanner")
+        .leftJoinAndSelect("renote.user", "renoteUser")
+        .leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
+        .leftJoinAndSelect("renoteUser.banner", "renoteUserBanner")
+        .andWhere("clipNote.clipId = :clipId", { clipId: clip.id });
 
     if (user) {
         generateVisibilityQuery(query, user);
@@ -79,8 +78,8 @@ export default define(meta, paramDef, async (ps, user) => {
     }
 
     const notes = await query
-		.take(ps.limit)
-		.getMany();
+        .take(ps.limit)
+        .getMany();
 
     return await Notes.packMany(notes, user);
 });

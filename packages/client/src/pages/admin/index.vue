@@ -125,11 +125,6 @@ const menuDef = computed(() => [{
         to: "/admin/announcements",
         active: currentPage.value?.route.name === "announcements",
     }, {
-        icon: "ti ti-ad",
-        text: i18n.ts.ads,
-        to: "/admin/ads",
-        active: currentPage.value?.route.name === "ads",
-    }, {
         icon: "ti ti-exclamation-circle",
         text: i18n.ts.abuseReports,
         to: "/admin/abuses",
@@ -152,12 +147,7 @@ const menuDef = computed(() => [{
         text: i18n.ts.security,
         to: "/admin/security",
         active: currentPage.value?.route.name === "security",
-    }] : []), {
-        icon: "ti ti-planet",
-        text: i18n.ts.relays,
-        to: "/admin/relays",
-        active: currentPage.value?.route.name === "relays",
-    }, ...(iAmAdmin ? [{
+    }] : []), ...(iAmAdmin ? [{
         icon: "ti ti-ban",
         text: i18n.ts.instanceBlocking,
         to: "/admin/instance-block",

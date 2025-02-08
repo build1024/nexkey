@@ -160,9 +160,6 @@ export const routes = [{
     component: page(() => import("./pages/about.vue")),
     hash: "initialTab",
 }, {
-    path: "/about-nexkey",
-    component: page(() => import("./pages/about-misskey.vue")),
-}, {
     path: "/ads",
     component: page(() => import("./pages/ads.vue")),
 }, {
@@ -255,10 +252,6 @@ export const routes = [{
         name: "announcements",
         component: page(() => import("./pages/admin/announcements.vue")),
     }, {
-        path: "/ads",
-        name: "ads",
-        component: page(() => import("./pages/admin/ads.vue")),
-    }, {
         path: "/database",
         name: "database",
         component: page(() => import("./pages/admin/database.vue")),
@@ -282,10 +275,6 @@ export const routes = [{
         path: "/security",
         name: "security",
         component: iAmAdmin ? page(() => import("./pages/admin/security.vue")) : page(() => import("./pages/not-found.vue")),
-    }, {
-        path: "/relays",
-        name: "relays",
-        component: page(() => import("./pages/admin/relays.vue")),
     }, {
         path: "/instance-block",
         name: "instance-block",

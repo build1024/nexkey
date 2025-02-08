@@ -1,5 +1,5 @@
 // https://github.com/typeorm/typeorm/issues/2400
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 // @ts-ignore
 import pg from "pg";
 pg.types.setTypeParser(20, Number);
@@ -52,12 +52,8 @@ import { Clip } from "@/models/entities/clip.js";
 import { ClipNote } from "@/models/entities/clip-note.js";
 import { Antenna } from "@/models/entities/antenna.js";
 import { AntennaNote } from "@/models/entities/antenna-note.js";
-import { PromoNote } from "@/models/entities/promo-note.js";
-import { PromoRead } from "@/models/entities/promo-read.js";
-import { Relay } from "@/models/entities/relay.js";
 import { MutedNote } from "@/models/entities/muted-note.js";
 import { RegistryItem } from "@/models/entities/registry-item.js";
-import { Ad } from "@/models/entities/ad.js";
 import { PasswordResetRequest } from "@/models/entities/password-reset-request.js";
 import { UserPending } from "@/models/entities/user-pending.js";
 import { Webhook } from "@/models/entities/webhook.js";
@@ -145,12 +141,8 @@ export const entities = [
     ClipNote,
     Antenna,
     AntennaNote,
-    PromoNote,
-    PromoRead,
-    Relay,
     MutedNote,
     RegistryItem,
-    Ad,
     PasswordResetRequest,
     UserPending,
     Webhook,

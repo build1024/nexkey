@@ -42,7 +42,6 @@ export const paramDef = {
     required: ["noteId"],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, user) => {
     const note = await getNote(ps.noteId).catch(e => {
         if (e.id === "9725d0ce-ba28-4dde-95a7-2cbb2c15de24") throw new ApiError(meta.errors.noSuchNote);
@@ -50,18 +49,18 @@ export default define(meta, paramDef, async (ps, user) => {
     });
 
     const query = makePaginationQuery(Notes.createQueryBuilder("note"), ps.sinceId, ps.untilId)
-		.andWhere("note.renoteId = :renoteId", { renoteId: note.id })
-		.innerJoinAndSelect("note.user", "user")
-		.leftJoinAndSelect("user.avatar", "avatar")
-		.leftJoinAndSelect("user.banner", "banner")
-		.leftJoinAndSelect("note.reply", "reply")
-		.leftJoinAndSelect("note.renote", "renote")
-		.leftJoinAndSelect("reply.user", "replyUser")
-		.leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
-		.leftJoinAndSelect("replyUser.banner", "replyUserBanner")
-		.leftJoinAndSelect("renote.user", "renoteUser")
-		.leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
-		.leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
+        .andWhere("note.renoteId = :renoteId", { renoteId: note.id })
+        .innerJoinAndSelect("note.user", "user")
+        .leftJoinAndSelect("user.avatar", "avatar")
+        .leftJoinAndSelect("user.banner", "banner")
+        .leftJoinAndSelect("note.reply", "reply")
+        .leftJoinAndSelect("note.renote", "renote")
+        .leftJoinAndSelect("reply.user", "replyUser")
+        .leftJoinAndSelect("replyUser.avatar", "replyUserAvatar")
+        .leftJoinAndSelect("replyUser.banner", "replyUserBanner")
+        .leftJoinAndSelect("renote.user", "renoteUser")
+        .leftJoinAndSelect("renoteUser.avatar", "renoteUserAvatar")
+        .leftJoinAndSelect("renoteUser.banner", "renoteUserBanner");
 
     generateVisibilityQuery(query, user);
     if (user) generateMutedUserQuery(query, user);

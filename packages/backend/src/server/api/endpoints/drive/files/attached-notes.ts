@@ -38,7 +38,6 @@ export const paramDef = {
     required: ["fileId"],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, user) => {
     // Fetch file
     const file = await DriveFiles.findOneBy({
@@ -51,8 +50,8 @@ export default define(meta, paramDef, async (ps, user) => {
     }
 
     const notes = await Notes.createQueryBuilder("note")
-		.where(":file = ANY(note.fileIds)", { file: file.id })
-		.getMany();
+        .where(":file = ANY(note.fileIds)", { file: file.id })
+        .getMany();
 
     return await Notes.packMany(notes, user, {
         detail: true,

@@ -101,12 +101,6 @@ function openInstanceMenu(ev: MouseEvent) {
         text: i18n.ts.federation,
         icon: "ti ti-whirl",
         to: "/about#federation",
-    }, {
-        text: i18n.ts.emergencyClient,
-        icon: "ti ti-battery-eco",
-        action: () => {
-            window.location.href = "/cli";
-        },
     }, null, {
         type: "parent",
         text: i18n.ts.help,
@@ -118,20 +112,9 @@ function openInstanceMenu(ev: MouseEvent) {
             icon: "ti ti-code",
         }, {
             type: "link",
-            to: "/scratchpad",
-            text: i18n.ts.scratchpad,
-            icon: "ti ti-terminal-2",
-        }, {
-            type: "link",
             to: "/api-console",
             text: "API Console",
             icon: "ti ti-terminal-2",
-        }, null, {
-            text: i18n.ts.document,
-            icon: "ti ti-help",
-            action: () => {
-                window.open("https://misskey-hub.net/help.html", "_blank");
-            },
         }],
     }, {
         type: "link",
@@ -183,7 +166,6 @@ useInterval(tick, 1000 * 15, {
 			top: 0;
 			z-index: 1;
 			padding: 20px 0;
-			background: var(--X14);
 			-webkit-backdrop-filter: var(--blur, blur(8px));
 			backdrop-filter: var(--blur, blur(8px));
 
@@ -234,7 +216,6 @@ useInterval(tick, 1000 * 15, {
 			position: sticky;
 			bottom: 0;
 			padding: 20px 0;
-			background: var(--X14);
 			-webkit-backdrop-filter: var(--blur, blur(8px));
 			backdrop-filter: var(--blur, blur(8px));
 

@@ -22,7 +22,6 @@ export const paramDef = {
     required: ["password"],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, user) => {
     const profile = await UserProfiles.findOneByOrFail({ userId: user.id });
 
@@ -40,9 +39,9 @@ export default define(meta, paramDef, async (ps, user) => {
     // 32 byte challenge
     const entropy = await randomBytes(32);
     const challenge = entropy.toString("base64")
-		.replace(/=/g, "")
-		.replace(/\+/g, "-")
-		.replace(/\//g, "_");
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_");
 
     const challengeId = genId();
 

@@ -1,9 +1,9 @@
 import sharp from "sharp";
 
 export type IImage = {
-	data: Buffer;
-	ext: string | null;
-	type: string;
+    data: Buffer;
+    ext: string | null;
+    type: string;
 };
 
 /**
@@ -16,16 +16,16 @@ export async function convertToJpeg(path: string, width: number, height: number)
 
 export async function convertSharpToJpeg(sharp: sharp.Sharp, width: number, height: number): Promise<IImage> {
     const data = await sharp
-		.resize(width, height, {
-		    fit: "inside",
-		    withoutEnlargement: true,
-		})
-		.rotate()
-		.jpeg({
-		    quality: 85,
-		    progressive: true,
-		})
-		.toBuffer();
+        .resize(width, height, {
+            fit: "inside",
+            withoutEnlargement: true,
+        })
+        .rotate()
+        .jpeg({
+            quality: 85,
+            progressive: true,
+        })
+        .toBuffer();
 
     return {
         data,
@@ -44,15 +44,15 @@ export async function convertToWebp(path: string, width: number, height: number,
 
 export async function convertSharpToWebp(sharp: sharp.Sharp, width: number, height: number, quality = 85): Promise<IImage> {
     const data = await sharp
-		.resize(width, height, {
-		    fit: "inside",
-		    withoutEnlargement: true,
-		})
-		.rotate()
-		.webp({
-		    quality,
-		})
-		.toBuffer();
+        .resize(width, height, {
+            fit: "inside",
+            withoutEnlargement: true,
+        })
+        .rotate()
+        .webp({
+            quality,
+        })
+        .toBuffer();
 
     return {
         data,
@@ -71,13 +71,13 @@ export async function convertToPng(path: string, width: number, height: number):
 
 export async function convertSharpToPng(sharp: sharp.Sharp, width: number, height: number): Promise<IImage> {
     const data = await sharp
-		.resize(width, height, {
-		    fit: "inside",
-		    withoutEnlargement: true,
-		})
-		.rotate()
-		.png()
-		.toBuffer();
+        .resize(width, height, {
+            fit: "inside",
+            withoutEnlargement: true,
+        })
+        .rotate()
+        .png()
+        .toBuffer();
 
     return {
         data,

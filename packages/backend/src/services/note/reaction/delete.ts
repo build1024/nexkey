@@ -30,13 +30,11 @@ export default async (user: { id: User["id"]; host: User["host"]; }, note: Note)
     // Decrement reactions count
     const sql = `jsonb_set("reactions", '{${exist.reaction}}', (COALESCE("reactions"->>'${exist.reaction}', '0')::int - 1)::text::jsonb)`;
     await Notes.createQueryBuilder().update()
-		.set({
+        .set({
 		    reactions: () => sql,
-		})
-		.where("id = :id", { id: note.id })
-		.execute();
-
-    Notes.decrement({ id: note.id }, "score", 1);
+        })
+        .where("id = :id", { id: note.id })
+        .execute();
 
     publishNoteStream(note.id, "unreacted", {
         reaction: decodeReaction(exist.reaction).reaction,

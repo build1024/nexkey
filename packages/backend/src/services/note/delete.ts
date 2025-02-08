@@ -11,7 +11,6 @@ import { Note, IMentionedRemoteUsers } from "@/models/entities/note.js";
 import { Notes, Users } from "@/models/index.js";
 import { deliverToFollowers, deliverToUser } from "@/remote/activitypub/deliver-manager.js";
 import { countSameRenotes } from "@/misc/count-same-renotes.js";
-import { deliverToRelays } from "../relay.js";
 
 /**
  * 投稿を削除します。
@@ -24,7 +23,6 @@ export default async function(user: { id: User["id"]; uri: User["uri"]; host: Us
     // この投稿を除く指定したユーザーによる指定したノートのリノートが存在しないとき
     if (note.renoteId && (await countSameRenotes(user.id, note.renoteId, note.id)) === 0) {
         Notes.decrement({ id: note.renoteId }, "renoteCount", 1);
-        Notes.decrement({ id: note.renoteId }, "score", 1);
     }
 
     if (note.replyId) {
@@ -84,12 +82,12 @@ async function findCascadingNotes(note: Note) {
 
     const recursive = async (noteId: string) => {
         const query = Notes.createQueryBuilder("note")
-			.where("note.replyId = :noteId", { noteId })
-			.orWhere(new Brackets(q => {
+            .where("note.replyId = :noteId", { noteId })
+            .orWhere(new Brackets(q => {
 			    q.where("note.renoteId = :noteId", { noteId })
-				.andWhere("note.text IS NOT NULL");
-			}))
-			.leftJoinAndSelect("note.user", "user");
+                    .andWhere("note.text IS NOT NULL");
+            }))
+            .leftJoinAndSelect("note.user", "user");
         const replies = await query.getMany();
         for (const reply of replies) {
             cascadingNotes.push(reply);
@@ -149,9 +147,7 @@ async function getMentionedRemoteUsers(note: Note) {
 }
 
 async function deliverToConcerned(user: { id: ILocalUser["id"]; host: null; }, note: Note, content: any) {
-    const retryable = true;
     deliverToFollowers(user, content);
-    deliverToRelays(user, content, retryable);
     const remoteUsers = await getMentionedRemoteUsers(note);
     for (const remoteUser of remoteUsers) {
         deliverToUser(user, content, remoteUser);

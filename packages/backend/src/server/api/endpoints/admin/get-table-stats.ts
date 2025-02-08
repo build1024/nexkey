@@ -25,7 +25,6 @@ export const paramDef = {
     required: [],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async () => {
     const sizes = await
     db.query(`
@@ -34,7 +33,7 @@ export default define(meta, paramDef, async () => {
 			WHERE nspname NOT IN ('pg_catalog', 'information_schema')
 				AND C.relkind <> 'i'
 				AND nspname !~ '^pg_toast';`)
-		.then(recs => {
+        .then(recs => {
 		    const res = {} as Record<string, { count: number; size: number; }>;
 		    for (const rec of recs) {
 		        res[rec.table] = {
@@ -43,7 +42,7 @@ export default define(meta, paramDef, async () => {
 		        };
 		    }
 		    return res;
-		});
+        });
 
     return sizes;
 });

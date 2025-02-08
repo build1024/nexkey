@@ -21,6 +21,12 @@ export const iAmAdmin = $i != null && $i.isAdmin;
 
 export async function signout() {
     waiting();
+    document.cookie.split(";").forEach((cookie) => {
+        const cookieName = cookie.split("=")[0].trim();
+        if (cookieName === "token") {
+            document.cookie = `${cookieName}=; max-age=0; path=/`;
+        }
+    });
     localStorage.removeItem("account");
 
     await removeAccount($i.id);
@@ -45,11 +51,13 @@ export async function signout() {
 
         if (accounts.length === 0) {
             await navigator.serviceWorker.getRegistrations()
-				.then(registrations => {
+                .then(registrations => {
 				    return Promise.all(registrations.map(registration => registration.unregister()));
-				});
+                });
         }
-    } catch (err) {}
+    } catch (err) {
+        console.error(err);
+    }
     //#endregion
 
     document.cookie = "igi=; path=/";
@@ -78,6 +86,10 @@ export async function removeAccount(id: Account["id"]) {
 }
 
 function fetchAccount(token: string): Promise<Account> {
+    // remove old token
+    document.cookie = "token=; path=/; max-age=0";
+    document.cookie = `token=${token}; path=/proxy; max-age=86400; SameSite=Strict; Secure`; // MediaProxyの認証で使う
+
     return new Promise((done, fail) => {
         // Fetch user
         fetch(`${apiUrl}/i`, {
@@ -86,8 +98,8 @@ function fetchAccount(token: string): Promise<Account> {
                 i: token,
             }),
         })
-		.then(res => res.json())
-		.then(res => {
+            .then(res => res.json())
+            .then(res => {
 		    if (res.error) {
 		        if (res.error.id === "a8c724b3-6e9c-4b46-b1a8-bc3ed6258370") {
 		            showSuspendedDialog().then(() => {
@@ -104,8 +116,8 @@ function fetchAccount(token: string): Promise<Account> {
 		        res.token = token;
 		        done(res);
 		    }
-		})
-		.catch(fail);
+            })
+            .catch(fail);
     });
 }
 
@@ -125,7 +137,6 @@ export async function login(token: Account["token"], redirect?: string) {
     if (_DEV_) console.log("logging as token ", token);
     const me = await fetchAccount(token);
     localStorage.setItem("account", JSON.stringify(me));
-    document.cookie = `token=${token}; path=/; max-age=31536000`; // bull dashboardの認証とかで使う
     await addAccount(me.id, token);
 
     if (redirect) {

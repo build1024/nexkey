@@ -14,7 +14,7 @@ RUN cargo build --release
 ### Build app
 ###################
 
-FROM node:22.12-alpine3.20 AS builder
+FROM node:22-alpine3.21 AS builder
 WORKDIR /misskey
 
 COPY .npmrc .yarnrc package.json yarn.lock ./
@@ -22,7 +22,7 @@ COPY locales/ ./locales/
 COPY scripts/ ./scripts/
 COPY packages/ ./packages/
 
-RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang libressl-dev vips-dev python3
+RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang vips-dev python3
 RUN yarn install
 RUN yarn build
 
@@ -30,7 +30,7 @@ RUN yarn build
 ### Install dependencies for production
 ###################
 
-FROM node:22.12-alpine3.20 AS deps_installer
+FROM node:22-alpine3.21 AS deps_installer
 WORKDIR /misskey
 
 COPY .npmrc .yarnrc package.json yarn.lock ./
@@ -38,14 +38,14 @@ COPY locales/ ./locales/
 COPY scripts/ ./scripts/
 COPY packages/ ./packages/
 
-RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang libressl-dev vips-dev python3
+RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang vips-dev python3
 RUN cd packages/backend && yarn install --production
 
 ###################
 ### Build runner
 ###################
 
-FROM node:22.12.0-alpine3.20 AS runner
+FROM node:22-alpine3.21 AS runner
 
 ARG UID="991"
 ARG GID="991"

@@ -29,15 +29,14 @@ export const paramDef = {
     required: ["userId"],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, user) => {
     const query = makePaginationQuery(Clips.createQueryBuilder("clip"), ps.sinceId, ps.untilId)
-		.andWhere("clip.userId = :userId", { userId: ps.userId })
-		.andWhere("clip.isPublic = true");
+        .andWhere("clip.userId = :userId", { userId: ps.userId })
+        .andWhere("clip.isPublic = true");
 
     const clips = await query
-		.take(ps.limit)
-		.getMany();
+        .take(ps.limit)
+        .getMany();
 
     return await Clips.packMany(clips);
 });

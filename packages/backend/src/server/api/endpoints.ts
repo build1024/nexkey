@@ -4,10 +4,6 @@ import * as ep___admin_meta from "./endpoints/admin/meta.js";
 import * as ep___admin_abuseUserReports from "./endpoints/admin/abuse-user-reports.js";
 import * as ep___admin_accounts_create from "./endpoints/admin/accounts/create.js";
 import * as ep___admin_accounts_delete from "./endpoints/admin/accounts/delete.js";
-import * as ep___admin_ad_create from "./endpoints/admin/ad/create.js";
-import * as ep___admin_ad_delete from "./endpoints/admin/ad/delete.js";
-import * as ep___admin_ad_list from "./endpoints/admin/ad/list.js";
-import * as ep___admin_ad_update from "./endpoints/admin/ad/update.js";
 import * as ep___admin_announcements_create from "./endpoints/admin/announcements/create.js";
 import * as ep___admin_announcements_delete from "./endpoints/admin/announcements/delete.js";
 import * as ep___admin_announcements_list from "./endpoints/admin/announcements/list.js";
@@ -40,15 +36,11 @@ import * as ep___admin_getUserIps from "./endpoints/admin/get-user-ips.js";
 import * as ep___admin_invite from "./endpoints/admin/invite.js";
 import * as ep___admin_moderators_add from "./endpoints/admin/moderators/add.js";
 import * as ep___admin_moderators_remove from "./endpoints/admin/moderators/remove.js";
-import * as ep___admin_promo_create from "./endpoints/admin/promo/create.js";
 import * as ep___admin_queue_clear from "./endpoints/admin/queue/clear.js";
 import * as ep___admin_queue_promote from "./endpoints/admin/queue/promote.js";
 import * as ep___admin_queue_deliverDelayed from "./endpoints/admin/queue/deliver-delayed.js";
 import * as ep___admin_queue_inboxDelayed from "./endpoints/admin/queue/inbox-delayed.js";
 import * as ep___admin_queue_stats from "./endpoints/admin/queue/stats.js";
-import * as ep___admin_relays_add from "./endpoints/admin/relays/add.js";
-import * as ep___admin_relays_list from "./endpoints/admin/relays/list.js";
-import * as ep___admin_relays_remove from "./endpoints/admin/relays/remove.js";
 import * as ep___admin_reset2fa from "./endpoints/admin/reset-2fa.js";
 import * as ep___admin_resetPassword from "./endpoints/admin/reset-password.js";
 import * as ep___admin_resolveAbuseUserReport from "./endpoints/admin/resolve-abuse-user-report.js";
@@ -194,7 +186,6 @@ import * as ep___notes_create from "./endpoints/notes/create.js";
 import * as ep___notes_delete from "./endpoints/notes/delete.js";
 import * as ep___notes_favorites_create from "./endpoints/notes/favorites/create.js";
 import * as ep___notes_favorites_delete from "./endpoints/notes/favorites/delete.js";
-import * as ep___notes_featured from "./endpoints/notes/featured.js";
 import * as ep___notes_globalTimeline from "./endpoints/notes/global-timeline.js";
 import * as ep___notes_hybridTimeline from "./endpoints/notes/hybrid-timeline.js";
 import * as ep___notes_mentions from "./endpoints/notes/mentions.js";
@@ -222,7 +213,6 @@ import * as ep___notifications_markAllAsRead from "./endpoints/notifications/mar
 import * as ep___notifications_read from "./endpoints/notifications/read.js";
 import * as ep___ping from "./endpoints/ping.js";
 import * as ep___pinnedUsers from "./endpoints/pinned-users.js";
-import * as ep___promo_read from "./endpoints/promo/read.js";
 import * as ep___resetDb from "./endpoints/reset-db.js";
 import * as ep___serverInfo from "./endpoints/server-info.js";
 import * as ep___stats from "./endpoints/stats.js";
@@ -259,10 +249,6 @@ const eps = [
     ["admin/abuse-user-reports", ep___admin_abuseUserReports],
     ["admin/accounts/create", ep___admin_accounts_create],
     ["admin/accounts/delete", ep___admin_accounts_delete],
-    ["admin/ad/create", ep___admin_ad_create],
-    ["admin/ad/delete", ep___admin_ad_delete],
-    ["admin/ad/list", ep___admin_ad_list],
-    ["admin/ad/update", ep___admin_ad_update],
     ["admin/announcements/create", ep___admin_announcements_create],
     ["admin/announcements/delete", ep___admin_announcements_delete],
     ["admin/announcements/list", ep___admin_announcements_list],
@@ -295,15 +281,11 @@ const eps = [
     ["admin/invite", ep___admin_invite],
     ["admin/moderators/add", ep___admin_moderators_add],
     ["admin/moderators/remove", ep___admin_moderators_remove],
-    ["admin/promo/create", ep___admin_promo_create],
     ["admin/queue/clear", ep___admin_queue_clear],
     ["admin/queue/promote", ep___admin_queue_promote],
     ["admin/queue/deliver-delayed", ep___admin_queue_deliverDelayed],
     ["admin/queue/inbox-delayed", ep___admin_queue_inboxDelayed],
     ["admin/queue/stats", ep___admin_queue_stats],
-    ["admin/relays/add", ep___admin_relays_add],
-    ["admin/relays/list", ep___admin_relays_list],
-    ["admin/relays/remove", ep___admin_relays_remove],
     ["admin/reset-2fa", ep___admin_reset2fa],
     ["admin/reset-password", ep___admin_resetPassword],
     ["admin/resolve-abuse-user-report", ep___admin_resolveAbuseUserReport],
@@ -449,7 +431,6 @@ const eps = [
     ["notes/delete", ep___notes_delete],
     ["notes/favorites/create", ep___notes_favorites_create],
     ["notes/favorites/delete", ep___notes_favorites_delete],
-    ["notes/featured", ep___notes_featured],
     ["notes/global-timeline", ep___notes_globalTimeline],
     ["notes/hybrid-timeline", ep___notes_hybridTimeline],
     ["notes/mentions", ep___notes_mentions],
@@ -477,7 +458,6 @@ const eps = [
     ["notifications/read", ep___notifications_read],
     ["ping", ep___ping],
     ["pinned-users", ep___pinnedUsers],
-    ["promo/read", ep___promo_read],
     ["reset-db", ep___resetDb],
     ["server-info", ep___serverInfo],
     ["stats", ep___stats],

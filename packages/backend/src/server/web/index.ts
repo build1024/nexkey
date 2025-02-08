@@ -41,7 +41,7 @@ function isAllowedAssetExt(ctx: Koa.Context): boolean {
     return allowedAssetsExt.some(ext => path.endsWith(ext));
 }
 
-// 参考にした: https://github.com/mei23/misskey/blob/2c6db29a4acbce7e4ad8d40a54afc481019199ab/src/server/web/index.ts#L33
+// 参考: https://github.com/mei23/misskey/blob/2c6db29a4acbce7e4ad8d40a54afc481019199ab/src/server/web/index.ts#L33
 // ToDo: script-srcのunsafeを消せるようにする
 export function genCsp(): {csp: string } {
     const csp
@@ -50,8 +50,8 @@ export function genCsp(): {csp: string } {
         + "script-src 'self' 'unsafe-inline' https://www.recaptcha.net/recaptcha/ https://www.gstatic.com/recaptcha/ https://challenges.cloudflare.com; "
         + "img-src 'self' https: data: blob:; "
         + "media-src 'self' https:; "
-        + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-        + "font-src 'self' https://fonts.gstatic.com; "
+        + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.gstatic.com https://fonts.googleapis.com; "
+        + "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com https://fonts.googleapis.com; "
         + "frame-src 'self' https:; "
         + "manifest-src 'self'; "
         + `connect-src 'self' data: blob: ${config.wsUrl}; `	// wssを指定しないとSafariで動かない https://github.com/w3c/webappsec-csp/issues/7#issuecomment-1086257826
@@ -181,30 +181,30 @@ router.get("/twemoji-badge/(.*)", async ctx => {
         `${_dirname}/../../../node_modules/@discordapp/twemoji/dist/svg/${path.replace(".png", "")}.svg`,
         { density: 1000 },
     )
-		.resize(488, 488)
-		.greyscale()
-		.normalise()
-		.linear(1.75, -(128 * 1.75) + 128) // 1.75x contrast
-		.flatten({ background: "#000" })
-		.extend({
+        .resize(488, 488)
+        .greyscale()
+        .normalise()
+        .linear(1.75, -(128 * 1.75) + 128) // 1.75x contrast
+        .flatten({ background: "#000" })
+        .extend({
 		    top: 12,
 		    bottom: 12,
 		    left: 12,
 		    right: 12,
 		    background: "#000",
-		})
-		.toColorspace("b-w")
-		.png()
-		.toBuffer();
+        })
+        .toColorspace("b-w")
+        .png()
+        .toBuffer();
 
     const buffer = await sharp({
         create: { width: 512, height: 512, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
     })
-		.pipelineColorspace("b-w")
-		.boolean(mask, "eor")
-		.resize(96, 96)
-		.png()
-		.toBuffer();
+        .pipelineColorspace("b-w")
+        .boolean(mask, "eor")
+        .resize(96, 96)
+        .png()
+        .toBuffer();
 
     ctx.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'");
     ctx.set("Cache-Control", "max-age=2592000");
@@ -292,8 +292,8 @@ router.get(["/@:user", "/@:user/:sub"], async (ctx, next) => {
         const meta = await fetchMeta();
         const me = profile.fields
             ? profile.fields
-				.filter(filed => filed.value != null && filed.value.match(/^https?:/))
-				.map(field => field.value)
+                .filter(filed => filed.value != null && filed.value.match(/^https?:/))
+                .map(field => field.value)
             : [];
 
         const { csp } = genCsp();
@@ -420,9 +420,6 @@ router.get("/cli", async ctx => {
         version: config.version,
     });
 });
-
-const override = (source: string, target: string, depth = 0) =>
-    [, ...target.split("/").filter(x => x), ...source.split("/").filter(x => x).splice(depth)].join("/");
 
 router.get("/flush", async ctx => {
     const { csp } = genCsp();

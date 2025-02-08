@@ -16,7 +16,6 @@ export const paramDef = {
     required: [],
 } as const;
 
-// eslint-disable-next-line import/no-default-export
 export default define(meta, paramDef, async (ps, user) => {
     // Update documents
     await MessagingMessages.update({
@@ -29,13 +28,13 @@ export default define(meta, paramDef, async (ps, user) => {
     const joinings = await UserGroupJoinings.findBy({ userId: user.id });
 
     await Promise.all(joinings.map(j => MessagingMessages.createQueryBuilder().update()
-		.set({
+        .set({
 		    reads: (() => `array_append("reads", '${user.id}')`) as any,
-		})
-		.where("groupId = :groupId", { groupId: j.userGroupId })
-		.andWhere("userId != :userId", { userId: user.id })
-		.andWhere("NOT (:userId = ANY(reads))", { userId: user.id })
-		.execute()));
+        })
+        .where("groupId = :groupId", { groupId: j.userGroupId })
+        .andWhere("userId != :userId", { userId: user.id })
+        .andWhere("NOT (:userId = ANY(reads))", { userId: user.id })
+        .execute()));
 
     publishMainStream(user.id, "readAllMessagingMessages");
 });
