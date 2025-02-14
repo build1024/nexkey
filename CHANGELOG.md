@@ -1,8 +1,17 @@
+## 12.25Q1.2
+### 重要: Dockerのイメージのリポジトリが変更されました
+新しいパスは`docker.io/nexryai/concorde`です
+
+ - SECURITY FIX: KoaのCriticalな脆弱性（CVE-2025-25200）の修正
+ - feat: 未認証のユーザーに対してはカスタム絵文字を表示しないようにする
+
 ## 12.25Q1.1
+ - SECURITY FIX: Cookieに関する複数の重大な脆弱性の修正
+   * [CVE-2025-24900](https://github.com/nexryai/concorde/security/advisories/GHSA-5hgq-9vw8-7v87)
+   * [CVE-2025-24973](https://github.com/nexryai/concorde/security/advisories/GHSA-2369-p2wh-7cc2)
  - Client: フォントの変更、UIの改善
  - Breaking: ハイライトと広告機能の削除
  - Feat: WebSocketサーバーのパフォーマンスを改善
- - Fix: セキュリティに関する重要な複数の修正
  - Chore: 依存関係の更新
  - Chore: 削除された機能のクリーンアップ
 
