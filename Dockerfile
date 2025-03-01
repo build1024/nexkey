@@ -66,7 +66,8 @@ WORKDIR /misskey
 RUN pm2 install pm2-logrotate \
   && pm2 set pm2-logrotate:max_size 10M \
   && pm2 set pm2-logrotate:retain 10 \
-  && pm2 set pm2-logrotate:dateFormat YYYY-MM-DD
+  && pm2 set pm2-logrotate:dateFormat YYYY-MM-DD \
+  && pm2 set pm2-logrotate:rotateInterval "0 0 * * 0"
 
 COPY --chown=misskey:misskey --from=builder /misskey/built ./built
 COPY --chown=misskey:misskey --from=deps_installer /misskey/packages/backend/node_modules ./packages/backend/node_modules
