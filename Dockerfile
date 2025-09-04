@@ -14,7 +14,7 @@ RUN cargo build --release
 ### Build app
 ###################
 
-FROM node:24.4-alpine3.21 AS builder
+FROM node:24.7-alpine3.22 AS builder
 WORKDIR /misskey
 
 COPY .npmrc .yarnrc package.json yarn.lock ./
@@ -30,7 +30,7 @@ RUN yarn build
 ### Install dependencies for production
 ###################
 
-FROM node:24.4-alpine3.21 AS deps_installer
+FROM node:24.7-alpine3.22 AS deps_installer
 WORKDIR /misskey
 
 COPY .npmrc .yarnrc package.json yarn.lock ./
@@ -45,7 +45,7 @@ RUN cd packages/backend && yarn install --production
 ### Build runner
 ###################
 
-FROM node:24.4-alpine3.21 AS runner
+FROM node:24.7-alpine3.22 AS runner
 
 ARG UID="991"
 ARG GID="991"
