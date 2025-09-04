@@ -79,10 +79,6 @@ export const routes = [{
         name: "theme",
         component: page(() => import("./pages/settings/theme.vue")),
     }, {
-        path: "/navbar",
-        name: "navbar",
-        component: page(() => import("./pages/settings/navbar.vue")),
-    }, {
         path: "/sounds",
         name: "sounds",
         component: page(() => import("./pages/settings/sounds.vue")),
@@ -146,12 +142,6 @@ export const routes = [{
         path: "/",
         component: page(() => import("./pages/_empty_.vue")),
     }],
-}, {
-    path: "/reset-password/:token?",
-    component: page(() => import("./pages/reset-password.vue")),
-}, {
-    path: "/signup-complete/:code",
-    component: page(() => import("./pages/signup-complete.vue")),
 }, {
     path: "/announcements",
     component: page(() => import("./pages/announcements.vue")),

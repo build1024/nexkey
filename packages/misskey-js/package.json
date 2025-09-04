@@ -16,15 +16,15 @@
 	},
 	"devDependencies": {
 		"@types/jest": "^30.0.0",
-		"@types/node": "24.0.10",
+		"@types/node": "24.3.0",
 		"jest": "^30.0.4",
 		"jest-fetch-mock": "^3.0.3",
 		"jest-websocket-mock": "^2.2.1",
 		"mock-socket": "^9.0.8",
 		"ts-jest": "^29.2.5",
 		"ts-node": "10.9.2",
-		"tsd": "^0.32.0",
-		"typescript": "5.8.3"
+		"tsd": "^0.33.0",
+		"typescript": "5.9.2"
 	},
 	"files": [
 		"built"
