@@ -26,19 +26,6 @@ RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang
 RUN yarn install
 RUN yarn build
 
-###################
-### Install dependencies for production
-###################
-
-FROM node:24.7-alpine3.22 AS deps_installer
-WORKDIR /misskey
-
-COPY .npmrc .yarnrc package.json yarn.lock ./
-COPY locales/ ./locales/
-COPY scripts/ ./scripts/
-COPY packages/ ./packages/
-
-RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang vips-dev python3
 RUN cd packages/backend && yarn install --production
 
 ###################
@@ -70,7 +57,7 @@ RUN pm2 install pm2-logrotate \
   && pm2 set pm2-logrotate:rotateInterval "0 0 * * 0"
 
 COPY --chown=misskey:misskey --from=builder /misskey/built ./built
-COPY --chown=misskey:misskey --from=deps_installer /misskey/packages/backend/node_modules ./packages/backend/node_modules
+COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/node_modules ./packages/backend/node_modules
 COPY --chown=misskey:misskey --from=builder /misskey/packages/backend/built ./packages/backend/built
 COPY --chown=misskey:misskey package.json pm2-config.json ./
 COPY --chown=misskey:misskey packages/backend/assets packages/backend/assets
