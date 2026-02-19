@@ -1,6 +1,6 @@
 {
 	"name": "concorde",
-	"version": "12.25Q3.2",
+	"version": "12.25Q4.1",
 	"codename": "Bartholos",
 	"repository": {
 		"type": "git",
@@ -11,7 +11,7 @@
 	},
 	"private": true,
 	"scripts": {
-		"postinstall": "node scripts/install-packages.mjs",
+		"postinstall": "echo '!!!!!!!! >>>> DO NOT USE THIS SOFTWARE <<<< !!!!!!!! \nConcorde ended maintenance on November 9, 2025, and extended security updates were discontinued on December 31, 2025. Going forward, security updates will no longer be provided for any vulnerabilities. Administrators operating instances are requested to take the time to switch to a different implementation.' && node scripts/install-packages.mjs",
 		"build-assets": "node ./scripts/build-client-assets.mjs",
 		"build": "node scripts/build.mjs",
 		"start": "cd packages/backend && pm2-runtime /misskey/pm2-config.json --node-args=\"--experimental-json-modules\"",
@@ -28,19 +28,19 @@
 		"cleanall": "npm run clean-all"
 	},
 	"dependencies": {
-		"cssnano": "7.1.0",
-		"execa": "9.6.0",
-		"js-yaml": "4.1.0",
+		"cssnano": "7.1.2",
+		"execa": "9.6.1",
+		"js-yaml": "4.1.1",
 		"postcss": "^8.5.6",
-		"terser": "5.43.1"
+		"terser": "5.44.1"
 	},
 	"devDependencies": {
-		"@eslint/js": "9.31.0",
-		"cross-env": "10.0.0",
-		"eslint": "9.33.0",
-		"globals": "16.3.0",
-		"typescript": "5.9.2",
-		"typescript-eslint": "8.39.0"
+		"@eslint/js": "9.37.0",
+		"cross-env": "10.1.0",
+		"eslint": "9.38.0",
+		"globals": "16.5.0",
+		"typescript": "5.9.3",
+		"typescript-eslint": "8.48.1"
 	},
 	"packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
